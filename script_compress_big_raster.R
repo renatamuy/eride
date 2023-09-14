@@ -1,4 +1,4 @@
-# Compressing rasters
+# Compressing rasters - comparison
 # Rê 2023 
 # R 4.3.1
 
@@ -13,7 +13,11 @@ setwd('F://')
 
 grassDir='C:/Program Files/GRASS GIS 8.2'
 
-im="serang_mercator.tif"
+im="E:/eride_optimized/eRIDE.tif"
+
+r <- rast(im)
+
+plot(r)
 
 rgrass::initGRASS(gisBase = grassDir,
                   SG = rast(im),
@@ -31,11 +35,14 @@ rgrass::execGRASS("r.in.gdal",
 rgrass::execGRASS("g.region",
                   raster="rast")
 
+rgrass::execGRASS("g.list", 
+                  type='raster')
+
 # Export not compressed float 64
 
 rgrass::execGRASS("r.out.gdal",
                   input="rast",
-                  output="serang_compressed_f64nc.tif",
+                  output="eride_compressed_f64nc.tif",
                   format="GTiff",
                   type="Float64",
                   flags="overwrite")
@@ -44,7 +51,7 @@ rgrass::execGRASS("r.out.gdal",
 
 rgrass::execGRASS("r.out.gdal",
                   input="rast",
-                  output="serang_compressed_f64.tif",
+                  output="eride_compressed_f64.tif",
                   format="GTiff",
                   type="Float64",
                   flags="overwrite",
@@ -54,7 +61,7 @@ rgrass::execGRASS("r.out.gdal",
 
 rgrass::execGRASS("r.out.gdal",
                   input="rast",
-                  output="serang_compressed_byte.tif",
+                  output="eride_compressed_byte.tif",
                   format="GTiff",
                   type="Float32",
                   flags="overwrite",
@@ -64,7 +71,7 @@ rgrass::execGRASS("r.out.gdal",
 
 rgrass::execGRASS("r.out.gdal",
                   input="rast",
-                  output="serang_compressed_f32.tif",
+                  output="eride_compressed_f32.tif",
                   format="GTiff",
                   type="Float32",
                   flags="overwrite",
@@ -74,11 +81,9 @@ rgrass::execGRASS("r.out.gdal",
 
 rgrass::execGRASS("r.out.gdal",
                   input="rast",
-                  output="serang_compressed_f32nc.tif",
+                  output="eride_compressed_f32nc.tif",
                   format="GTiff",
                   type="Float32",
                   flags="overwrite")
 
 #-----------------------------
-
-

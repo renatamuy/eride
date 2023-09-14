@@ -182,6 +182,5 @@ plot(results$eRIDE)
 end_time <- Sys.time()
 end_time - start_time
 
-
 # createopt="TFW=YES,COMPRESS=DEFLATE"
 #--------------------------------------------
