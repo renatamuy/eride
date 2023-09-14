@@ -116,6 +116,12 @@ rgrass::execGRASS(cmd = "r.neighbors",
                   memory = memory)
 rgrass::execGRASS(cmd = "g.message",
                   message = "Writing images to disk")
+## All binary (mask) images are written in "Byte" format
+## All numerical data is forced into "float32" format with TFW (separate world file) and DEFLATE (compression).
+## This causes a slight loss of precision, as GRASS stores the data in DCELL format, which is only lossless when using "float64"
+## The loss of precision is minute, but allows a 10x decrease in file size.
+## As a guide to disk usage - each output numerical data file will be approximately 3/4 the size of the original "tif" file (for Renata's mercator data).
+
 rgrass::execGRASS(cmd = "g.message",
                   message = "Fragment map...")
 rgrass::execGRASS("r.out.gdal",
@@ -130,16 +136,18 @@ rgrass::execGRASS("r.out.gdal",
                   input="r_fragment_area_ncell",
                   output="areas.tif",
                   format="GTiff",
-                  type="Float64",
-                  flags="overwrite")
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 rgrass::execGRASS(cmd = "g.message",
                   message = "Biodiversity map...")
 rgrass::execGRASS("r.out.gdal",
                   input="bio",
                   output="biodiversity.tif",
                   format="GTiff",
-                  type="Float64",
-                  flags="overwrite")
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 rgrass::execGRASS(cmd = "g.message",
                   message = "Edges map...")
 rgrass::execGRASS("r.out.gdal",
@@ -154,16 +162,18 @@ rgrass::execGRASS("r.out.gdal",
                   input="wb",
                   output="wb.tif",
                   format="GTiff",
-                  type="Float64",
-                  flags="overwrite")
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 rgrass::execGRASS(cmd = "g.message",
                   message = "eRIDE...")
 rgrass::execGRASS("r.out.gdal",
                   input="eRIDE",
                   output="eRIDE.tif",
                   format="GTiff",
-                  type="Float64",
-                  flags="overwrite") #createopt="TFW=YES,COMPRESS=DEFLATE"
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 
 #r.compress 
 results <- rast(im)
