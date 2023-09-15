@@ -45,8 +45,38 @@ start_time <- Sys.time()
 
 # Create a binary image of forest areas - here, this is raster values between 51 and 115. Hope that's correct.
 # Saves the output as a grass environment layer called "r"
+
+
+# rgrass::execGRASS("r.mapcalc",
+#                  expression="r = rast > 50 && rast < 116",
+#                  flags=c("overwrite"))
+
+## Use this one for strata data. (layers 5,6,12 and 13 are considered forest).
+## STRATA LAYER DATA:
+# 1	True desert	⩾90% bare ground
+# 2	Semi-arid land	⩾25% to <90% bare ground
+# 3	Dense short vegetation	0% to <25% bare ground
+# 4	Open tree cover	⩾3 and (<10 m or <70% tree cover)
+# 5	Dense tree cover	⩾10 m and ⩾70% tree cover
+# 6	Recent tree cover gain	Recent ⩾3 m and ⩾10% tree cover
+# 7	Non-fire loss no trees, no cropland, no built-up
+#  	Wetland strata
+# 8	Salt pan	⩾90% bare ground
+# 9	Semi-arid	⩾25% to <90% bare ground
+# 10	Dense short vegetation	0% to <25% bare ground
+# 11	Open tree cover	⩾3 and (<10 m or <70% tree cover)
+# 12	Dense tree cover	⩾10 m and ⩾70% tree cover
+# 13	Recent tree cover gain	Recent ⩾3 m and ⩾10% tree cover
+# 14	Non-fire loss, no trees, no cropland, no built-up
+# 	Superseding strata
+# 15	Ice	Permanent ice
+# 16	Water	Permanent surface water
+# 17	Cropland	Cropland land use
+# 18	Built-up	Human-built surfaces and structures
+# 19	Ocean	Ocean
+
 rgrass::execGRASS("r.mapcalc",
-                  expression="r = rast > 50 && rast < 116",
+                  expression="r = rast == 5 || rast == 6 || rast == 12 || rast == 13",
                   flags=c("overwrite"))
 
 nprocs=7
