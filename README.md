@@ -8,4 +8,6 @@
 * Creating the mosaic of tropics and subtropics area :soon:
 * Reproject the big raster 🗺️ in R grass when importing :soon:
 * Adjust code for latitude :soon:
+
+
 **Draft**: [Click here](https://docs.google.com/document/d/1XA9YiusEpzN-8HhapnUwRKm7G4IbV6cg4AtUOdaiaGg/edit?usp=sharing)
