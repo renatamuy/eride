@@ -2,9 +2,11 @@
 
 # eride issues 🤯
 
-* Dealing with storage: Simon ordered the 8TB HD
-* After creating the mosaic of tropics and subtropics area, let's attempt to reproject the big raster 🗺️ in R grass when importing 
-* Compression issues
-* Weird values from code, re-run
+* Dealing with storage: 10TB HD 
+* Compression set to Float32 :white_check_mark:
+* Weird values from code, re-run :white_check_mark:
+* Creating the mosaic of tropics and subtropics area,
+* Reproject the big raster 🗺️ in R grass when importing :black_square_button:
+* Adjust code for latitude :black_square_button:
 
 **Draft**: [Click here](https://docs.google.com/document/d/1XA9YiusEpzN-8HhapnUwRKm7G4IbV6cg4AtUOdaiaGg/edit?usp=sharing)
