@@ -4,16 +4,18 @@ latitudinal_model <- function(latitude, peak, k) {
   return(peak * exp(-k * abs(latitude)))
 }
 
+# params
+
 latitude <- 30  # Remember we have projected data!
 
 # Max limit for mammals in 1 sqkm = 191
 # Max limit for birds in 1sqkm = 532
 
-
 peak <- 532 + 191 
 
-
 k <- 0.02      
+
+#---
 
 biodiversity <- latitudinal_model(latitude, peak, k)
 
@@ -38,7 +40,6 @@ latitudinal_model_gaussian <- function(latitude, plateau, width, center) {
 # Specify a range of latitudes
 latitudes <- seq(-90, 90, by = 1)  
 
-
 plateau <- 100
 width <- 20  
 center <- 0  
@@ -49,7 +50,7 @@ plot(latitudes, biodiversity, type = "l",
      xlab = "Latitude", ylab = "Biodiversity",
      main = "Latitudinal Biodiversity Pattern (Gaussian Decay)")
 
-#----------------------------------------------------
+#---
 
 # Informations about our projected data:
 
@@ -57,14 +58,16 @@ plot(latitudes, biodiversity, type = "l",
 
 origin=c(0,0)
 
-Bounding_box = c(
+bounding_box = c(
   minlong = -180,
   minlat= -85.06,
   maxlong=180,   
   maxlat=85.06 )
 
-Projected bounds=  c( 
+projected_bounds=  c( 
     minlong= -20037508.34,
     minlat= -20048966.1,
     maxlong=20037508.34, 
     maxlat=20048966.1)
+
+#---------------------------------------------------
