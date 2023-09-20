@@ -2,9 +2,12 @@
 
 # eride issues 🤯
 
-* Dealing with storage: Simon ordered the 8TB HD
-* After creating the mosaic of tropics and subtropics area, let's attempt to reproject the big raster 🗺️ in R grass when importing 
-* Compression issues
-* Weird values from code, re-run
+* Dealing with storage: 10TB HD :white_check_mark:
+* Compression set to Float32 :white_check_mark:
+* Weird values from code, re-run :white_check_mark:
+* Creating the mosaic of tropics and subtropics area :soon:
+* Reproject the big raster 🗺️ in R grass when importing :soon:
+* Adjust code for latitudinal gradients of biodiversity by setting up a decay function from the Equator and limiting maximum values of Biodiversity :soon:
+
 
 **Draft**: [Click here](https://docs.google.com/document/d/1XA9YiusEpzN-8HhapnUwRKm7G4IbV6cg4AtUOdaiaGg/edit?usp=sharing)
