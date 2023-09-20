@@ -13,10 +13,6 @@ setwd('E://')
 #import your image -creates a grass environment layer called "rast"
 # Base data - real landscape
 
-require(terra)
-require(lsmetrics)
-require(rgrass)
-
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
 grassDir='C:/Program Files/GRASS GIS 8.2'
@@ -38,14 +34,15 @@ rgrass::execGRASS("r.in.gdal",
                   flags = c("overwrite"))
 
 # Crop the extent of the environment to that of you image.
-rgrass::execGRASS("g.region ",
+rgrass::execGRASS("g.region",
                   n='-915000',
-                  e='13110000',
+                  e='13115000',
                   s='-920000',
-                  w='13115000',
+                  w='13110000',
                   raster="rast")
 
 start_time <- Sys.time()
+
 
 # Create a binary image of forest areas - here, this is raster values between 51 and 115. Hope that's correct.
 # Saves the output as a grass environment layer called "r"
@@ -210,7 +207,7 @@ rgrass::execGRASS("r.out.gdal",
                   createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 
 #r.compress 
-results <- rast(im)
+results <- rast()
 results$fragments=rast("fragments.tif")
 results$fragment_area <- rast("areas.tif")  
 results$biodiversity <- rast("biodiversity.tif")
