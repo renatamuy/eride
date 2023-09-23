@@ -121,17 +121,8 @@ rgrass::execGRASS(cmd = "r.stats.zonal",
                   flags = c("overwrite"),
                   base = "r_fragment_id",
                   cover = "latitude",
-                  method = "range",
-                  output = "latitude_range")
-rgrass::execGRASS(cmd = "r.stats.zonal",
-                  flags = c("overwrite"),
-                  base = "r_fragment_id",
-                  cover = "latitude",
-                  method = "min",
-                  output = "latitude_min")
-rgrass::execGRASS(cmd = "r.mapcalc",
-                  flags = "overwrite",
-                  expression = "latitude_scale_values = latitude_min + (latitude_range/2)")
+                  method = "average",
+                  output = "latitude_scale_values")
 
 ### NEED TO SCALE BIODIVERSITY LAYER BY LATITUDE DATA HERE ###
 
