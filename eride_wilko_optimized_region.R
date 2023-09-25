@@ -13,10 +13,6 @@ setwd('E://')
 #import your image -creates a grass environment layer called "rast"
 # Base data - real landscape
 
-require(terra)
-require(lsmetrics)
-require(rgrass)
-
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
 grassDir='C:/Program Files/GRASS GIS 8.2'
@@ -217,10 +213,10 @@ results$eRIDE<- rast("eRIDE.tif")
 res2=terra::crop(results,ext(13110000,13115000,-920000,-915000))
 plot(res2)
 
+
 plot(results$eRIDE)
 
 end_time <- Sys.time()
 end_time - start_time
 
-# createopt="TFW=YES,COMPRESS=DEFLATE"
 #--------------------------------------------
