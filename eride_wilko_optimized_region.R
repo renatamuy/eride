@@ -109,6 +109,20 @@ rgrass::execGRASS("r.mapcalc",
                   expression=paste0("bio = r_fragment_area_ncell^",z),
                   flags=c("overwrite"))
 rgrass::execGRASS(cmd = "g.message",
+                  message = "Calculating Latitude map...")
+rgrass::execGRASS(cmd = "r.mapcalc",
+                  flags = "overwrite",
+                  expression = "latitude = y()* r_frament_zero")
+rgrass::execGRASS(cmd = "r.stats.zonal",
+                  flags = c("overwrite"),
+                  base = "r_fragment_id",
+                  cover = "latitude",
+                  method = "average",
+                  output = "latitude_scale_values")
+
+### NEED TO SCALE BIODIVERSITY LAYER BY LATITUDE DATA HERE ###
+
+rgrass::execGRASS(cmd = "g.message",
                   message = paste0("Finding patch edges using ",nprocs," processors"))
 rgrass::execGRASS(cmd = "r.neighbors",
                   flags = c("c", "overwrite"),
@@ -161,6 +175,22 @@ rgrass::execGRASS(cmd = "g.message",
 rgrass::execGRASS("r.out.gdal",
                   input="r_fragment_area_ncell",
                   output="areas.tif",
+                  format="GTiff",
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
+rgrass::execGRASS(cmd = "g.message",
+                  message = "Latitude maps...")
+rgrass::execGRASS("r.out.gdal",
+                  input="latitude",
+                  output="latitude.tif",
+                  format="GTiff",
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
+rgrass::execGRASS("r.out.gdal",
+                  input="latitude_scale_values",
+                  output="latitude_scales.tif",
                   format="GTiff",
                   type="Float32",
                   flags=c("overwrite","f"),
