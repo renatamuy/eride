@@ -8,11 +8,10 @@ require(rgrass)
 
 setwd('E://')
 
-#"C:/Program Files/GRASS GIS 8.2"
 # Initialise the grass environment.
 #import your image -creates a grass environment layer called "rast"
 # Base data - real landscape
-
+#"C:/Program Files/GRASS GIS 8.2"
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
 grassDir='C:/Program Files/GRASS GIS 8.2'
@@ -42,7 +41,7 @@ start_time <- Sys.time()
 # Create a binary image of forest areas - here, this is raster values between 51 and 115. Hope that's correct.
 # Saves the output as a grass environment layer called "r"
 
-
+# For map layer
 # rgrass::execGRASS("r.mapcalc",
 #                  expression="r = rast > 50 && rast < 116",
 #                  flags=c("overwrite"))
@@ -242,7 +241,6 @@ results$eRIDE<- rast("eRIDE.tif")
 
 res2=terra::crop(results,ext(13110000,13115000,-920000,-915000))
 plot(res2)
-
 
 plot(results$eRIDE)
 
