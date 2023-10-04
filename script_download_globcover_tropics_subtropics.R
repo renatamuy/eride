@@ -1,7 +1,8 @@
 #' ----
 #' script: download globe cover 2019
 #' author: mauricio vancine
-#' data: 2022-05-10
+#' data: 2023-05-10
+#' Tropics 0 to 23. Subtropics 23 to 35
 #' ----
 
 # links
@@ -32,6 +33,8 @@ url_strata
 # download ----------------------------------------------------------------
 
 # map
+
+setwd('G://')
 dir.create("map")
 purrr::map2(.x = url_map, .y = paste0("map/", basename(url_map)), .f = download.file, mode = "wb")
 

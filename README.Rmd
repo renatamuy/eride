@@ -1,0 +1,94 @@
+---
+title: "README"
+author: "Renata Muylaert"
+date: "2023-10-04"
+output: html_document
+---
+
+# eride <a href='https://github.com/renatamuy/eride/'><img src="figures/logo.png" id="home_logo" align="right" height="180"/></a>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?color=%2336BCF7&center=true&vCenter=true&width=600&lines=Kia+ora!;Let's+do+this;We+love+R)](https://git.io/typing-svg)
+
+# eride issues 🤯
+
+### October 2023
+* Uploading world strata to mosaic in Nesi 
+* Match resolution between mammals & birds and eRIDR
+* Is our z too low, or the simple AOH multiplication will make it alright and a-scalar?
+
+### September 2023
+
+* Dealing with storage: 10TB HD :white_check_mark:
+* Compression type set to Float32 :white_check_mark:
+* Weird values from code (class code from map == detailed color legend is different from class code for strata), re-run :white_check_mark:
+* Code average latitude per patch :white_check_mark:
+* Adjust code for latitudinal gradients of biodiversity by setting up a decay function from the Equator and limiting maximum values of Biodiversity :soon:
+* Creating the mosaic of tropics and subtropics area :soon:
+* Reproject the big raster 🗺️ in R grass when importing :soon:
+
+### 29/09/2023
+
+* Summing projected birds and mammals AOH of the world 86%
+
+  
+**Draft**: [Click here](https://docs.google.com/document/d/1XA9YiusEpzN-8HhapnUwRKm7G4IbV6cg4AtUOdaiaGg/edit?usp=sharing)
+
+
+# rgrass quick launch 
+
+```{rgrass}
+
+require(terra)
+require(rgrass)
+
+set.seed(123)
+
+setwd('G://')
+
+grassDir='C:/Program Files/GRASS GIS 8.2'
+
+im="G://eride_region_not_latcor//biodiversity.tif" 
+
+im2='G://birds_mammals_mercator_100m.tif'
+
+# Set location at 100 m
+
+rgrass::initGRASS(gisBase = grassDir,
+                  SG = rast(im), 
+                  gisDbase = "grassdb",
+                  location = "default",  
+                  mapset = "PERMANENT",
+                  override = TRUE, 
+                  remove_GISRC = TRUE)
+
+# Set region as small
+
+#rgrass::execGRASS("g.region",
+ #                 n="13115000", 
+  #                e="-915000", 
+   #               s="13110000", 
+    #              w="-920000")
+
+# Import 
+
+
+# Import with on the fly warping
+
+rgrass::execGRASS("r.in.gdal",
+                  input = im,
+                  output = "rast",
+                  flags = c("overwrite"))
+
+rgrass::execGRASS("r.import",
+                  input = im2,
+                  output = "birds_mammals",
+                  flags = c("overwrite"))
+
+rgrass::execGRASS("g.list", 
+                  type='raster', mapset='PERMANENT')
+
+```

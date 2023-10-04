@@ -7,3 +7,5 @@ rgrass::execGRASS("g.region",
                   e="-915000", 
                   s="13110000", 
                   w="-920000") 
+
+unlink("grassdb", recursive = TRUE)

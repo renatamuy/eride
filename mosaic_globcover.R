@@ -16,7 +16,7 @@ library(rgdal)
 library(sp) 
 library(gdalUtils)
 
-workdir = "F://strata//"
+workdir = "strata/"
 
 setwd(workdir)
 
@@ -28,7 +28,7 @@ suppressPackageStartupMessages(library(rgdal))
 
   files_list <- paste(dir(workdir))
   
-  nome.arq.wgs84 <- paste("globcover_region.tif", sep="")
+  nome.arq.wgs84 <- paste("globcover_world.tif", sep="")
   
   # Mosaic
   
