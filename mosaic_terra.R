@@ -23,8 +23,3 @@ plot(mosaic_result)
 writeRaster(mosaic_result, 'test.tif', gdal=c("COMPRESS=DEFLATE", "TFW=YES"), overwrite=TRUE)
 
 #--------------------------------------------------------------
-
-
-
-
-
