@@ -14,7 +14,11 @@
 
 # 29/09/2023
 
-* Summing projected birds and mammals AOH of the world 86%
+* Projected birds and mammals AOH of the world layer (100 m) :white_check_mark:
+
+# 11/10/2023
+
+* Mosaic of the world (globcover)
 
   
 **Draft**: [Click here](https://docs.google.com/document/d/1XA9YiusEpzN-8HhapnUwRKm7G4IbV6cg4AtUOdaiaGg/edit?usp=sharing)
