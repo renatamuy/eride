@@ -1,7 +1,10 @@
+# R 4.4.1 Race for Your Life        
 # eRIDE optimized
 # Packages ---------------------------------------------------------------------------------------------------
 # library(pak)
+
 # pak::pkg_install("mauriciovancine/lsmetrics")
+
 require(terra)
 require(lsmetrics)
 require(rgrass)
@@ -9,14 +12,15 @@ require(rgrass)
 setwd('E://')
 
 # Initialise the grass environment.
-#import your image -creates a grass environment layer called "rast"
+# import your image -creates a grass environment layer called "rast"
 # Base data - real landscape
-#"C:/Program Files/GRASS GIS 8.2"
+# "C:/Program Files/GRASS GIS 8.2"
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
 grassDir='C:/Program Files/GRASS GIS 8.2'
 
 im="globcover_reg_mercator.tif"
+
 
 rgrass::initGRASS(gisBase = grassDir,
                   SG = rast(im),
@@ -26,15 +30,30 @@ rgrass::initGRASS(gisBase = grassDir,
                   override = TRUE, 
                   remove_GISRC = TRUE)
 
-
 rgrass::execGRASS("r.in.gdal",
                   input = im,
                   output = "rast",
                   flags = c("overwrite"))
 
-# Crop the extent of the environment to that of you image.
+
+# Creating a blank raster to run eride for a small region
+
+ref_im <- rast("globcover_reg_mercator.tif")
+crs_reference <- crs(ref_im)
+resolution_reference <- res(reference_raster)
+blank_raster <- rast(extent=ext(13110000,13115000,-920000,-915000), 
+                     res=resolution_reference, 
+                     crs=crs_reference)
+values(blank_raster) <- NA
+
+# Crop the extent of the environment to that of you image ----------------
+
 rgrass::execGRASS("g.region",
-                  raster="rast")
+                  raster="blank_raster")
+
+
+#--------------
+
 
 start_time <- Sys.time()
 
@@ -45,7 +64,6 @@ start_time <- Sys.time()
 # rgrass::execGRASS("r.mapcalc",
 #                  expression="r = rast > 50 && rast < 116",
 #                  flags=c("overwrite"))
-
 ## Use this one for strata data. (layers 5,6,12 and 13 are considered forest).
 ## STRATA LAYER DATA:
 # 1	True desert	⩾90% bare ground
@@ -109,6 +127,7 @@ rgrass::execGRASS("r.mapcalc",
                   flags=c("overwrite"))
 rgrass::execGRASS(cmd = "g.message",
                   message = "Calculating Latitude map...")
+
 rgrass::execGRASS(cmd = "r.mapcalc",
                   flags = "overwrite",
                   expression = "latitude = y()* r_frament_zero")
