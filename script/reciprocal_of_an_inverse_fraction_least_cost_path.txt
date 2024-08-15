@@ -1,0 +1,12 @@
+# transforming resistance into least cost -------------------
+# Apply the multiplicative inverse
+# Less people (10 / sqkm) - more resistance to spread
+1/10
+# More people (801/sqkm) - less resistance to spread
+1/801.57
+# Get the reciprocal back to find the original density value
+1/ 0.001247552 
+# A lot of people - resistance almost zero
+1/30000
+# How to get back the reciprocal 
+

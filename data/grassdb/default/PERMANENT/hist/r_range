@@ -1,0 +1,10 @@
+Thu Aug 15 15:42:51 2024
+r_range
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RNEIGH~1
+RNEIGH~1 --overwrite -c input="r_frament_zero" output="r_range" size\
+=3 method="range" weighting_function="none" nprocs=7 memory=1000

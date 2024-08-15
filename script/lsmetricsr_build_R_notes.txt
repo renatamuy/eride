@@ -1,0 +1,17 @@
+devtools::check()
+
+
+1 error x | 5 warnings x | 2 notes x
+Erro: R CMD check found ERRORs
+
+ devtools::document(roclets = c('rd', 'collate', 'namespace'))
+
+devtools::build()
+
+   
+[1] "D:/OneDrive - Massey University/lsmetricsr_0.0.0.9000.tar.gz"
+
+Source package written to D:/OneDrive - Massey University
+
+
+Install and restart on Build aba

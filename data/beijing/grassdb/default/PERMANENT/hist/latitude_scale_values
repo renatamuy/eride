@@ -1,0 +1,10 @@
+Thu Aug 15 12:26:59 2024
+latitude_scale_values
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RSTATS~3
+RSTATS~3 --overwrite base="r_fragment_id" cover="latitude" method="a\
+verage" output="latitude_scale_values"

@@ -1,0 +1,4 @@
+GISDBASE: grassdb
+LOCATION_NAME: default
+MAPSET: PERMANENT
+GRASS_GUI: text

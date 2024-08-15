@@ -1,0 +1,10 @@
+Thu Aug 15 15:42:48 2024
+rast
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RINGDA~1
+RINGDA~1 --overwrite input="toy.tif" output="rast" memory=300 offset\
+=0 num_digits=0

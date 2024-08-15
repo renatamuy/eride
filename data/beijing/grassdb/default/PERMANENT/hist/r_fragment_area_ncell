@@ -1,0 +1,10 @@
+Thu Aug 15 12:26:58 2024
+r_fragment_area_ncell
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RSTATS~3
+RSTATS~3 --overwrite base="r_fragment_id" cover="r_frament_null" met\
+hod="count" output="r_fragment_area_ncell"

@@ -1,0 +1,11 @@
+Thu Aug 15 12:27:05 2024
+eRIDE
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RNEIGH~1
+RNEIGH~1 --overwrite input="wb" output="eRIDE" size=25 method="avera\
+ge" weighting_function="gaussian" weighting_factor=2 nprocs=7 memory\
+=1000

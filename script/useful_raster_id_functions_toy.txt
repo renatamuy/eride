@@ -1,0 +1,8 @@
+# neat!
+
+selected_ids <- 1:1000
+
+selected_id_raster <-rasterFromCells(pop, selected_ids, values=TRUE)
+
+#  rows from 1 to 100, cols from 1 to 100
+#toy <- crop(pop, extent(pop, 1, 100, 1, 100))
