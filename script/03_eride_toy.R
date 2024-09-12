@@ -5,8 +5,12 @@
 
 # Packages ---------------------------------------------------------------------------------------------------
 
+#devtools::install_github("wpgp/wpgpDownloadR")
+
+
 require(terra)
 require(rgrass)
+
 
 setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
 
@@ -60,10 +64,60 @@ rgrass::execGRASS("r.in.gdal",
                   output = "blank_raster",
                   flags = c("overwrite"))
 
-rgrass::execGRASS("g.region",
-                  raster="blank_raster")
+# Set working resolution 
 
-#--------------
+wres <- '30' # 3 arc (~100 m)
+
+rgrass::execGRASS("g.region",
+                  raster="blank_raster", 
+                  res = wres) #degrading working resolution to 100 m
+
+# Imported Pop for pop at risk (PAR) calc
+
+wd = 'G:/'
+
+# ISO3 alpha code, variable, wd
+# Indonesia pop DOI: 10.5258/SOTON/WP00645
+#pop <- wpgpGetCountryDataset("IDN", "ppp_2020", wd)
+
+
+ind_provinces <- rnaturalearth::ne_states("Indonesia", returnclass = "sf")
+unique(ind_provinces$type_en)
+
+# Provinces to keep
+keep <- c("Banten",
+          "West Java", 
+          "Central Java",   
+          "Yogyakarta"  ,
+          "East Java" ,
+          "Bali")
+
+subset_districts <- ind_provinces[ind_provinces$name_en %in% keep, ]
+
+sf::st_write(subset_districts, 'subset_districts.shp')
+
+unique(subset_districts$name_en) #
+
+unique(subset_districts$type_en)
+
+#Banten, Jakarta, West Java, Central Java, Yogyakarta, East Java, Bali.
+
+
+pop <- 'G://human_population/worldpop//idn_pd_2020_1km_unconstrained_mercator.tif' # 1km
+
+#idn <- rast('G://worldpop_100m//idn_ppp_2020.tif')
+
+#plot(idn)
+
+rgrass::execGRASS("r.in.gdal",
+                  input = pop,
+                  output = "pop",
+                  flags = c("overwrite"))
+
+# List rasters
+rgrass::execGRASS("g.list", type = "raster")
+
+#-------------- eRIDE and PAR calculation
 
 start_time <- Sys.time()
 
@@ -102,10 +156,14 @@ rgrass::execGRASS("r.mapcalc",
                   expression="r = rast == 5 || rast == 6 || rast == 12 || rast == 13",
                   flags=c("overwrite"))
 
+# Parameters
 nprocs=7
 memory=1000
 z=0.2
-radius=25
+# The larger the radius, the slower the processing time
+# Approximating it to 20 x 20 window size from Wilkinson et al (2018)
+radius = 10
+window_size = 2 * radius + 1
 
 rgrass::execGRASS(cmd = "g.message",
                   message = "Creating NULL background")
@@ -176,12 +234,19 @@ rgrass::execGRASS(cmd = "r.neighbors",
                   flags = c("overwrite"),
                   input = "wb",
                   output = "eRIDE",
-                  size = radius,
+                  size = window_size,
                   weighting_function="gaussian",
                   weighting_factor=2,
                   method = "average",
                   nprocs = nprocs,
                   memory = memory)
+# Population at risk (PAR)
+rgrass::execGRASS(cmd = "g.message",
+                  message = "Creating PAR raster")
+rgrass::execGRASS("r.mapcalc",
+                  expression=paste0("PAR = eRIDE * pop"),
+                  flags=c("overwrite"))
+
 rgrass::execGRASS(cmd = "g.message",
                   message = "Writing images to disk")
 ## All binary (mask) images are written in "Byte" format
@@ -207,6 +272,7 @@ rgrass::execGRASS("r.out.gdal",
                   type="Float32",
                   flags=c("overwrite","f"),
                   createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
+# Latitude map creation
 rgrass::execGRASS(cmd = "g.message",
                   message = "Latitude maps...")
 rgrass::execGRASS("r.out.gdal",
@@ -225,6 +291,7 @@ rgrass::execGRASS("r.out.gdal",
                   createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 rgrass::execGRASS(cmd = "g.message",
                   message = "Biodiversity map...")
+# Optional: correct for latitude accordingly
 rgrass::execGRASS("r.out.gdal",
                   input="bio",
                   output="biodiversity.tif",
@@ -258,6 +325,14 @@ rgrass::execGRASS("r.out.gdal",
                   type="Float32",
                   flags=c("overwrite","f"),
                   createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
+#PAR
+rgrass::execGRASS("r.out.gdal",
+                  input="PAR",
+                  output="PAR.tif",
+                  format="GTiff",
+                  type="Float32",
+                  flags=c("overwrite","f"),
+                  createopt="TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
 
 #r.compress 
 
@@ -276,14 +351,21 @@ results$biodiversity <- rast("biodiversity.tif")
 results$edges <- rast("edges.tif")
 results$weighted_boundaries <- rast("wb.tif")
 results$eRIDE<- rast("eRIDE.tif")
+results$PAR <- rast('PAR.tif')
 
-plot(results$eRIDE)
+par(mfrow=c(2,2))
+plot(results$biodiversity, main='biodiversity')
+plot(results$edges, main='edges')
+plot(results$eRIDE, main=paste('eRIDE with radius =', radius, 'px'))
+plot(results$PAR, main= paste('Population at Risk per', wres,'m2') )
 
-png(filename='results.png', res=300, units = 'cm', width= 18, height = 10)
+hist(results$PAR)
+
+#png(filename='results.png', res=300, units = 'cm', width= 18, height = 10)
 plot(results)
-dev.off()
+#dev.off()
 
 end_time <- Sys.time()
 end_time - start_time
 
-#--------------------------------------------
+#--------------------------------------------------------------------------------------------
