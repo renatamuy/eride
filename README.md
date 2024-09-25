@@ -18,8 +18,9 @@
 * Mosaic job failed.
 
 # July-August 2024
-* Code trim
-* Meeting with Dave W
+* Code trim :soon:
+* Meeting with Dave W :soon:
+
 # September 2024
 
 * Reproject any big raster 🗺️ in R grass when importing :white_check_mark:
