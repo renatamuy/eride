@@ -4,6 +4,7 @@ library(ggplot2)  # For creating graphs
 library(dplyr)  # For data manipulation
 library(tidyr)  # For data reshaping
 
+setwd('data')
 # Define the working resolutions
 resolutions <- c(30, 60, 100)
 
