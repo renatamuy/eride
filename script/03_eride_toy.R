@@ -7,7 +7,6 @@
 
 #devtools::install_github("wpgp/wpgpDownloadR")
 
-
 require(terra)
 require(rgrass)
 
@@ -94,7 +93,7 @@ keep <- c("Banten",
 
 subset_districts <- ind_provinces[ind_provinces$name_en %in% keep, ]
 
-sf::st_write(subset_districts, 'subset_districts.shp')
+#sf::st_write(subset_districts, 'subset_districts.shp')
 
 unique(subset_districts$name_en) #
 
@@ -364,6 +363,8 @@ hist(results$PAR)
 #png(filename='results.png', res=300, units = 'cm', width= 18, height = 10)
 plot(results)
 #dev.off()
+
+print('finished')
 
 end_time <- Sys.time()
 end_time - start_time

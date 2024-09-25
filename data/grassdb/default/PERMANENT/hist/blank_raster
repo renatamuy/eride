@@ -1,4 +1,4 @@
-Thu Aug 15 15:42:49 2024
+Wed Sep 25 13:31:32 2024
 blank_raster
 PERMANENT
 rdelaram
@@ -6,5 +6,5 @@ raster
 
 
 gerado por RINGDA~1
-RINGDA~1 --overwrite input="blank_raster.tif" output="blank_raster" \
-memory=300 offset=0 num_digits=0
+RINGDA~1 --overwrite input="blank_raster_100.tif" output="blank_rast\
+er" memory=300 offset=0 num_digits=0
