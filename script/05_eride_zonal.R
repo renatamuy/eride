@@ -19,7 +19,86 @@ vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_distr
 
 #epsg 3857
 
+require(sf)
 
+regions <- read_sf(vector_file)
+
+centroids <- st_centroid(myshaprefile)
+
+regions
+
+
+#- 
+raster_data <- terra::rast("E://eride_optimized//eRIDE.tif")
+
+# Extract mean raster values (e.g., GDP) for each region
+regions$PAR <- terra::extract(raster_data, regions, fun = mean, na.rm = TRUE)
+
+
+# Step 4: Calculate pairwise distances between centroids of regions
+n_regions <- nrow(regions)
+
+# Initialize an empty matrix for distances
+distance_matrix <- matrix(NA, n_regions, n_regions)
+
+# Loop through each pair of regions and calculate the distance between their centroids
+for (i in 1:n_regions) {
+  for (j in 1:n_regions) {
+    if (i != j) {
+      # Calculate geographic distance (in kilometers) between centroids
+      distance_matrix[i, j] <- distGeo(st_coordinates(centroids[i,]), st_coordinates(centroids[j,])) / 1000
+    } else {
+      distance_matrix[i, j] <- 0 # Distance to self is 0
+    }
+  }
+}
+
+# Step 5: Create a data frame to store pairwise region interactions
+gravity_data <- data.frame()
+
+# Populate the dataframe with region pairs, their PARs (pop at risk), and distances
+for (i in 1:n_regions) {
+  for (j in 1:n_regions) {
+    if (i != j) {  # Exclude self-pairs
+      gravity_data <- rbind(gravity_data, data.frame(
+        Region_A = regions$RegionName[i],  # Replace 'RegionName' with the name column in your shapefile
+        Region_B = regions$RegionName[j],
+        GDP_A = regions$PAR[i],
+        GDP_B = regions$PAR[j],
+        Distance = distance_matrix[i, j]
+      ))
+    }
+  }
+}
+
+# Step 6: Apply the gravity model formula
+# Define a constant G (you can modify this as needed)
+G <- 1
+
+# Calculate trade flow using the gravity model formula
+gravity_data$Risk_Flow <- G * (gravity_data$PAR_A * gravity_data$PAR) / gravity_data$Distance
+
+# View the results
+head(gravity_data)
+
+
+#-------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Grass workflow
 #rgrass::execGRASS("g.list", type = "vector")
 # Import the vector
 rgrass::execGRASS(
