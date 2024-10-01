@@ -1,4 +1,4 @@
-# java zonal
+# java zonal - gravity model
 
 require(terra)
 require(rgrass)

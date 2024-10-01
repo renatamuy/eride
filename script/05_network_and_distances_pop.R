@@ -190,7 +190,3 @@ l <- layout_in_circle(gnl)
 plot(gnl, layout=l)
 
 #  ------------------------------------
-
-
-
-

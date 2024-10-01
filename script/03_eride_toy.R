@@ -33,6 +33,8 @@ rgrass::initGRASS(gisBase = grassDir,
                   override = TRUE, 
                   remove_GISRC = TRUE)
 
+# Creating rast 
+
 rgrass::execGRASS("r.in.gdal",
                   input = im,
                   output = "rast",
@@ -108,12 +110,15 @@ pop <- 'G://human_population/worldpop//idn_pd_2020_1km_unconstrained_mercator.ti
 
 #plot(idn)
 
+# Creating pop
 rgrass::execGRASS("r.in.gdal",
                   input = pop,
                   output = "pop",
                   flags = c("overwrite"))
 
+
 # List rasters
+
 rgrass::execGRASS("g.list", type = "raster")
 
 #-------------- eRIDE and PAR calculation

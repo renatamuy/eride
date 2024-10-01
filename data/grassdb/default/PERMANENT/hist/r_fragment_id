@@ -1,10 +1,10 @@
-Wed Sep 25 14:42:37 2024
+Mon Sep 30 16:41:20 2024
 r_fragment_id
 PERMANENT
 rdelaram
 raster
-r_frament_null
+r_fragment_null
 
 gerado por RCLUMP~1
-RCLUMP~1 --overwrite --quiet -d input="r_frament_null" output="r_fra\
-gment_id" threshold=0 minsize=1
+RCLUMP~1 --overwrite --quiet -d input="r_fragment_null" output="r_fr\
+agment_id" threshold=0 minsize=1
