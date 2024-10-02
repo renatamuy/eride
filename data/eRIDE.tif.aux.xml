@@ -1,0 +1,12 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <Description>eRIDE</Description>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">2.3156716823578</MDI>
+      <MDI key="STATISTICS_MEAN">1.493668366436</MDI>
+      <MDI key="STATISTICS_MINIMUM">1</MDI>
+      <MDI key="STATISTICS_STDDEV">0.35575296313604</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">95.67</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

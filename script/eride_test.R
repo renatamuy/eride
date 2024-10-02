@@ -1,7 +1,13 @@
+# eRIDE ad PAR run
+# September 2024
+#---------------------------------------------------------------------------------------
+
 require(terra)
 require(rgrass)
 
-setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
+#setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
+
+setwd('E:/')
 
 # Find grass
 #Linux
@@ -10,10 +16,21 @@ setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
 #Windows
 grassDir='C:/Program Files/GRASS GIS 8.2'
 
-# Initialise the grass environment
-# import your image -creates a grass environment layer called "rast"
 
-im="toy.tif"
+# Set the desired environment --------------------------------------------------------------------------------
+
+# Import Pop for pop at risk (PAR) calculation
+
+wd = 'G:/'
+
+pop <- 'G:/indonesia/idn_ppp_2020.tif' # 100 m
+
+# Creating pop as base for the environment
+
+
+im="E://globcover_reg_mercator.tif"
+
+#imr <- rast(im)
 
 rgrass::initGRASS(gisBase = grassDir,
                   SG = rast(im),
@@ -23,41 +40,37 @@ rgrass::initGRASS(gisBase = grassDir,
                   override = TRUE, 
                   remove_GISRC = TRUE)
 
+rgrass::execGRASS("g.list", type = "raster")
 
-# Creating a blank raster to run eride for a smaller region
-# IMR is reference image for a fast run
+# Import with reprojection
 
-imr <- rast('toy.tif')
-
-# Toy extent ----------------------------------------------------------------------
-
-refext <- ext(imr)
-resolution_reference <- res(imr)
-crs_reference <- crs(imr)
-
-blank_raster <- rast(extent=refext, 
-                     res=resolution_reference, 
-                     crs=crs_reference)
-
-values(blank_raster) <- NA
-
-writeRaster(blank_raster, filename = 'blank_raster.tif', overwrite=TRUE)
-
-# Set the extent of the environment to that of you image ----------------
-
-rgrass::execGRASS("r.in.gdal",
-                  input = 'blank_raster.tif',
-                  output = "blank_raster",
+rgrass::execGRASS("r.import",
+                  input = pop,
+                  output = "pop",
                   flags = c("overwrite"))
 
-# Set working resolution 
+rgrass::execGRASS("g.list", type = "raster")
 
-wres <- '30' # 3 arc (~100 m)
+# Set environment extent and resolution
+
+wres <- '100' # 3 arc (~100 m)
 
 rgrass::execGRASS("g.region",
-                  raster="blank_raster", 
-                  res = wres) #degrading working resolution to 100 m
+                  raster="pop", 
+                  res = wres) 
 
+#-------------------------------------------------------------------------------------------------------------
+
+
+# Creating a blank raster from rast to run eride for a smaller region
+
+# Land use raster
+
+im="E://globcover_reg_mercator.tif"
+
+#imr <- rast(im)
+
+#---------------------------------------------------
 
 # Creating rast 
 
@@ -66,29 +79,36 @@ rgrass::execGRASS("r.in.gdal",
                   output = "rast",
                   flags = c("overwrite"))
 
-# Imported Pop for pop at risk (PAR) calc
 
-wd = 'G:/'
+# Create blank raster for custom region ----------------------------------------------------------------------
 
-pop <- 'G://human_population/worldpop//idn_pd_2020_1km_unconstrained_mercator.tif' # 1km
+#refext <- ext(imr)
+#resolution_reference <- res(imr)
+#crs_reference <- crs(imr)
 
-#idn <- rast('G://worldpop_100m//idn_ppp_2020.tif')
+#blank_raster <- rast(extent=refext, 
+ #                    res=resolution_reference, 
+  #                   crs=crs_reference)
 
-#plot(idn)
+#values(blank_raster) <- NA
 
-# Creating pop
+#writeRaster(blank_raster, filename = 'blank_raster.tif', overwrite=TRUE)
 
-rgrass::execGRASS("r.in.gdal",
-                  input = pop,
-                  output = "pop",
-                  flags = c("overwrite"))
+# Import 
+
+#rgrass::execGRASS("r.in.gdal",
+ #                 input = 'blank_raster.tif',
+ #                 output = "blank_raster",
+  #                flags = c("overwrite"))
+
+
 
 
 # List rasters
 
 rgrass::execGRASS("g.list", type = "raster")
 
-
+# Call function
 
 source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
 
@@ -96,4 +116,4 @@ source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
 
 eride_run("rast", "pop")
 
-
+#-------------------------------------------------------------------------------------------------------------
