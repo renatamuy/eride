@@ -1,5 +1,5 @@
 # eRIDE ad PAR run
-# September 2024
+# October 2024
 #---------------------------------------------------------------------------------------
 
 require(terra)
@@ -9,68 +9,31 @@ require(rgrass)
 
 setwd('E:/')
 
-# Find grass
-#Linux
+# Find grass on Linux
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
-#Windows
+# Find grass on Windows
 grassDir='C:/Program Files/GRASS GIS 8.2'
 
 
 # Set the desired environment --------------------------------------------------------------------------------
-
-# Import Pop for pop at risk (PAR) calculation
-
-wd = 'G:/'
-
-pop <- 'G:/indonesia/idn_ppp_2020.tif' # 100 m
-
-# Creating pop as base for the environment
-
+# Land use raster
 
 im="E://globcover_reg_mercator.tif"
 
-#imr <- rast(im)
+imr <- rast(im)
+
+plot(imr)
 
 rgrass::initGRASS(gisBase = grassDir,
                   SG = rast(im),
                   gisDbase = "grassdb",
-                  location = "default",  
+                  location = "asia",  
                   mapset = "PERMANENT",
                   override = TRUE, 
                   remove_GISRC = TRUE)
 
 rgrass::execGRASS("g.list", type = "raster")
-
-# Import with reprojection
-
-rgrass::execGRASS("r.import",
-                  input = pop,
-                  output = "pop",
-                  flags = c("overwrite"))
-
-rgrass::execGRASS("g.list", type = "raster")
-
-# Set environment extent and resolution
-
-wres <- '100' # 3 arc (~100 m)
-
-rgrass::execGRASS("g.region",
-                  raster="pop", 
-                  res = wres) 
-
-#-------------------------------------------------------------------------------------------------------------
-
-
-# Creating a blank raster from rast to run eride for a smaller region
-
-# Land use raster
-
-im="E://globcover_reg_mercator.tif"
-
-#imr <- rast(im)
-
-#---------------------------------------------------
 
 # Creating rast 
 
@@ -79,30 +42,42 @@ rgrass::execGRASS("r.in.gdal",
                   output = "rast",
                   flags = c("overwrite"))
 
+# Check info for the region initialised
 
-# Create blank raster for custom region ----------------------------------------------------------------------
+execGRASS("g.region", flags = "p", intern = TRUE)
 
-#refext <- ext(imr)
-#resolution_reference <- res(imr)
-#crs_reference <- crs(imr)
+# Set region resolution
 
-#blank_raster <- rast(extent=refext, 
- #                    res=resolution_reference, 
-  #                   crs=crs_reference)
+wres <- '100' # 3 arc (~100 m)
 
-#values(blank_raster) <- NA
+rgrass::execGRASS("g.region",
+                  raster="rast", 
+                  res = wres) 
 
-#writeRaster(blank_raster, filename = 'blank_raster.tif', overwrite=TRUE)
+execGRASS("g.region", flags = "p", intern = TRUE)
 
-# Import 
+# Check rast back from GRASS to R
 
-#rgrass::execGRASS("r.in.gdal",
- #                 input = 'blank_raster.tif',
- #                 output = "blank_raster",
-  #                flags = c("overwrite"))
+raster_back <- read_RAST("rast", return_format = "terra") 
+ 
+raster_back # note that rast now has resolution = wres
 
+plot(raster_back)
+hist(raster_back)
 
+# Import and reproject Pop for pop at risk (PAR) calculation
 
+pop <- 'G:/indonesia/idn_ppp_2020.tif' # 100 m
+
+rgrass::execGRASS("r.import",
+                  input = pop,
+                  output = "pop",
+                  flags = c("overwrite"))
+
+# Set region extent
+
+rgrass::execGRASS("g.region",
+                  raster="pop") 
 
 # List rasters
 
@@ -111,8 +86,6 @@ rgrass::execGRASS("g.list", type = "raster")
 # Call function
 
 source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
-
-# Example call
 
 eride_run("rast", "pop")
 
