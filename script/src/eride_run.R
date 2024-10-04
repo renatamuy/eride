@@ -6,7 +6,7 @@ eride_run <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.2, radius = 10
   # Define window size
   window_size <- 2 * radius + 1
   
-  # Binary image for forest areas based on land cover classes
+  # Create binary forest map
   execGRASS("r.mapcalc",
             expression = "r = rast == 5 || rast == 6 || rast == 12 || rast == 13",
             flags = c("overwrite"))
@@ -41,12 +41,12 @@ eride_run <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.2, radius = 10
             base = "r_fragment_id", cover = "latitude",
             method = "average", output = "latitude_scale_values")
   
-  # Find patch edges
+  # Find edges
   execGRASS("r.neighbors", flags = c("c", "overwrite"),
             input = "r_fragment_zero", output = "r_range", size = 3,
             method = "range", nprocs = nprocs, memory = memory)
   
-  # Create edges layer
+  # Create edges raster
   execGRASS("r.mapcalc",
             expression = "r_edges = r_range * r_fragment_zero",
             flags = c("overwrite"))
@@ -67,7 +67,7 @@ eride_run <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.2, radius = 10
             expression = "PAR = eRIDE * pop",
             flags = c("overwrite"))
   
-  # Export results to GeoTIFF
+  # Export results
   output_files <- list("fragments.tif" = "r_fragment_zero",
                        "areas.tif" = "r_fragment_area_ncell",
                        "latitude.tif" = "latitude",
@@ -86,5 +86,8 @@ eride_run <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.2, radius = 10
   }
   
   end_time <- Sys.time()
-  print(paste("Execution time:", round(end_time - start_time, digits=2), " seconds."))
+  
+  execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
+  
+  print(paste("Execution time:", round(execution_time, digits=2), "seconds."))
 }

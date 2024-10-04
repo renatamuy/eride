@@ -76,17 +76,21 @@ rgrass::execGRASS("r.import",
 
 # Set region extent
 
-rgrass::execGRASS("g.region",
-                  raster="pop") 
+rgrass::execGRASS("g.region", raster="pop") 
 
 # List rasters
 
 rgrass::execGRASS("g.list", type = "raster")
+
 
 # Call function
 
 source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
 
 eride_run("rast", "pop")
+
+# Remove mask 
+
+rgrass::execGRASS("r.mask", flags="r")
 
 #-------------------------------------------------------------------------------------------------------------
