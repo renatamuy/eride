@@ -6,7 +6,7 @@
 
 # Base raster 
 
-source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
+source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run_scales.R")
 require(terra)
 require(rgrass)
 library(sf)
@@ -82,7 +82,7 @@ south_3857 <- st_bbox(bbox_3857)["ymin"]
 east_3857 <- st_bbox(bbox_3857)["xmax"]
 west_3857 <- st_bbox(bbox_3857)["xmin"]
 
-# Resolutions
+# Resolution values
 
 resolution_values <- c(100, 200, 300, 400, 500, 1000, 2000, 5000)
 
