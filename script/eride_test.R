@@ -6,7 +6,7 @@ require(terra)
 require(rgrass)
 
 #setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
-
+# Find a spacious dir
 setwd('E:/')
 
 # Find grass on Linux
@@ -15,12 +15,11 @@ setwd('E:/')
 # Find grass on Windows
 grassDir='C:/Program Files/GRASS GIS 8.2'
 
-
 # Set the desired environment --------------------------------------------------------------------------------
 # Land use raster
-
 im="E://globcover_reg_mercator.tif"
 
+# Check land use raster 
 imr <- rast(im)
 
 plot(imr)
@@ -36,18 +35,15 @@ rgrass::initGRASS(gisBase = grassDir,
 rgrass::execGRASS("g.list", type = "raster")
 
 # Creating rast 
-
 rgrass::execGRASS("r.in.gdal",
                   input = im,
                   output = "rast",
                   flags = c("overwrite"))
 
 # Check info for the region initialised
-
 execGRASS("g.region", flags = "p", intern = TRUE)
 
-# Set region resolution
-
+# Set working resolution for your region
 wres <- '100' # 3 arc (~100 m)
 
 rgrass::execGRASS("g.region",
@@ -56,8 +52,7 @@ rgrass::execGRASS("g.region",
 
 execGRASS("g.region", flags = "p", intern = TRUE)
 
-# Check rast back from GRASS to R
-
+# Check rast back from GRASS to R (can be SLOW)
 raster_back <- read_RAST("rast", return_format = "terra") 
  
 raster_back # note that rast now has resolution = wres
@@ -65,8 +60,7 @@ raster_back # note that rast now has resolution = wres
 plot(raster_back)
 hist(raster_back)
 
-# Import and reproject Pop for pop at risk (PAR) calculation
-
+# Import and reproject pop for pop at risk (PAR) calculation
 pop <- 'G:/indonesia/idn_ppp_2020.tif' # 100 m
 
 rgrass::execGRASS("r.import",
@@ -75,22 +69,15 @@ rgrass::execGRASS("r.import",
                   flags = c("overwrite"))
 
 # Set region extent
-
 rgrass::execGRASS("g.region", raster="pop") 
 
 # List rasters
-
 rgrass::execGRASS("g.list", type = "raster")
 
 
 # Call function
-
 source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run.R")
 
 eride_run("rast", "pop")
-
-# Remove mask 
-
-rgrass::execGRASS("r.mask", flags="r")
 
 #-------------------------------------------------------------------------------------------------------------
