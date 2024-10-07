@@ -1,50 +1,34 @@
 #' ----
-# Packages used in 
-# Make sure you are 
+# Packages used in Muylaert et al
 #' ----
 
 # extra 
-require(ncdf4)
 library(ggplot2)
 library(dplyr)
 library(hrbrthemes)
 require(RColorBrewer)
-library(randomcoloR)
 require(raster)
 
 
 # package list
 pkg_list_cran <- c("devtools", 
-                   "Rcpp",
                    "here",
                    "tidyverse",
                    "xlsx", 
-                   "vroom",
                    "data.table",
                    "janitor",
                    "stringi",
                    "reshape2",
                    "DataExplorer",
                    "skimr",
-                   "XML",
-                   "spocc",
-                   "taxize",
-                   "CoordinateCleaner",
-                   "rredlist",
                    "rnaturalearth",
                    "rnaturalearthdata",
                    "spData",
                    "sf",
                    "raster",
                    "terra",
-                   "ncdf4",
-                   "spatialEco",
-                   "ecospat",
-                   "dismo",
-                   "tmap",
                    "ggmap",
                    "ggspatial",
-                   "ggsn",
                    "ggbump",
                    "gghighlight",
                    "ggraph",
@@ -53,26 +37,15 @@ pkg_list_cran <- c("devtools",
                    "maps",
                    "mapdata",
                    "legendMap",
-                   "rasterVis",
-                   "leaflet",
-                   "leafem",
-                   "leaflet.opacity",
                    "htmlwidgets",
                    "htmltools",
                    "lattice",
                    "ggpubr",
-                   "corrplot",
-                   "classInt",
                    "graphlayouts",
-                   "oaqc",
-                   "bipartite",
                    "RColorBrewer",
-                   "randomcoloR",
                    "viridis",
                    "wesanderson",
-                   "hrbrthemes",
-                   "rstatix",
-                   "MuMIn")
+                   "hrbrthemes")
 
 # require else install all packages
 lapply(X = pkg_list_cran, 
@@ -82,5 +55,6 @@ lapply(X = pkg_list_cran,
 if(!require(scico)) devtools::install_github("thomasp85/scico")
 if(!require(platexpress)) devtools::install_github("raim/platexpress")
 if(!require(Manu)) devtools::install_github("G-Thomson/Manu")
+
 
 # end ---------------------------------------------------------------------

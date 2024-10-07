@@ -37,7 +37,8 @@ regions <- regions[regions$name_en %in% keep, ]
 # be aware they are multi-polygon regions
 centroids <- st_centroid(regions)
 
-raster_data <- terra::rast("E://PAR_500.tif")
+# get raster of population at risk at the desired resolution
+raster_data <- terra::rast("E://PAR_100.tif")
 
 #plot(regions['name'])
 #plot(raster_data, add=TRUE)
@@ -165,7 +166,7 @@ fig_grav <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow, fill =
     plot.title = element_text(size = 16, hjust = 0.5) ) +
   scale_fill_manual(values = rev(get_pal("Kereru"))) 
 
-ggsave(filename= 'fig_grav.tif', dpi=400, width=15, height = 17, units = 'cm')
+ggsave(filename= 'fig_grav_100m.tif', dpi=400, width=15, height = 17, units = 'cm')
 
 # Map with network
 
@@ -175,7 +176,7 @@ network_data <- risk_contribution_long %>%
 
 # Create a simple edge list for flows
 edge_list <- network_data %>%
-  select(source = Name_A, target = Name_B, flow = Risk_Flow)
+  select(from = Name_A, to = Name_B, flow = Risk_Flow)
 
 # Extract coordinates from the centroids shapefile
 centroid_coords <- st_coordinates(centroids)
@@ -187,7 +188,7 @@ coords_df <- data.frame(name = centroids$name, X = centroid_coords[, 1], Y = cen
 print(head(coords_df))
 
 # Create a data frame of unique nodes for the edge list and merge coordinates
-nodes_df <- data.frame(name = unique(c(edge_list$source, edge_list$target)), stringsAsFactors = FALSE) %>%
+nodes_df <- data.frame(name = unique(c(edge_list$from, edge_list$to)), stringsAsFactors = FALSE) %>%
   left_join(coords_df, by = "name")
 
 # this tbl_graph approach did not work... so I moved on to sfnetworks
@@ -242,6 +243,7 @@ ggplot() +
 edges_tbl <- edge_list %>%
   mutate(from = as.character(from), to = as.character(to))
 
+
 edges_tbl <- edge_list %>%
   left_join(nodes_df, by = c("from" = "name")) %>%
   rename(long.from = X, lat.from = Y) %>%
@@ -280,8 +282,8 @@ grav_network <- ggplot() +
 
 grav_network
 
-ggsave(filename= 'fig_grav_network.tif', dpi=400, width=18, height = 10, units = 'cm')
+ggsave(filename= 'fig_grav_network_100m.tif', dpi=400, width=18, height = 10, units = 'cm')
 
-ggsave(filename= 'fig_grav_network.png', dpi=400, width=18, height = 10, units = 'cm')
+ggsave(filename= 'fig_grav_network_100m.png', dpi=400, width=18, height = 10, units = 'cm')
 
 #---------------------------------------------------------------------------------------------------------
