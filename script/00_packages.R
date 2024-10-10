@@ -56,5 +56,4 @@ if(!require(scico)) devtools::install_github("thomasp85/scico")
 if(!require(platexpress)) devtools::install_github("raim/platexpress")
 if(!require(Manu)) devtools::install_github("G-Thomson/Manu")
 
-
 # end ---------------------------------------------------------------------

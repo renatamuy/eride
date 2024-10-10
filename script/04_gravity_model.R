@@ -35,7 +35,8 @@ regions <- read_sf(vector_file)
 regions <- regions[regions$name_en %in% keep, ]
 
 # be aware they are multi-polygon regions
-centroids <- st_centroid(regions)
+centroids <- st_centroid(regions) # add pop raster 
+
 
 # get raster of population at risk at the desired resolution
 raster_data <- terra::rast("E://PAR_100.tif")
@@ -59,7 +60,14 @@ raster_data <- terra::rast("E://PAR_100.tif")
 
 regions$PAR <- terra::extract(raster_data, regions, fun = mean, na.rm = TRUE)
 
-regions$PAR
+regionstoxp <- regions
+
+regionstoxp$PAR <-  regions$PAR[[2]]
+
+colnames(regionstoxp)
+
+# Export to results (to merge with management)
+st_write(regionstoxp, "regions_PAR.shp", append=FALSE)
 
 
 # pairwise distances between centroids of regions
@@ -149,6 +157,10 @@ total_risk_contribution <- risk_contribution_long %>%
 risk_contribution_long$Region <- factor(risk_contribution_long$Name_A,
                                         levels = total_risk_contribution$Name_A)
 
+
+# Export
+write.csv(gravity_data, file = 'gravity_model_results.csv')
+
 # Barchart with contributions
 
 setwd('results')
@@ -166,7 +178,10 @@ fig_grav <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow, fill =
     plot.title = element_text(size = 16, hjust = 0.5) ) +
   scale_fill_manual(values = rev(get_pal("Kereru"))) 
 
-ggsave(filename= 'fig_grav_100m.tif', dpi=400, width=15, height = 17, units = 'cm')
+ggsave(filename= 'fig_contribution_grav_100m.tif', dpi=400, width=15, height = 17, units = 'cm')
+
+ggsave(filename= 'fig_contribution_100m.png', dpi=400, width=15, height = 17, units = 'cm')
+
 
 # Map with network
 
@@ -258,7 +273,13 @@ edges_sf <- edges_tbl %>%
   mutate(geometry = st_sfc(st_linestring(rbind(c(long.from, lat.from), c(long.to, lat.to))), crs = 4326)) %>%
   st_as_sf()
 
-# Spatial network - gravity model
+
+# Edges
+
+st_write(edges_sf, "edges_sf.shp", delete_dsn = TRUE)
+
+
+# Spatial network - gravity modelhttp://127.0.0.1:17399/graphics/plot_zoom_png?width=2048&height=1090
 
 grav_network <- ggplot() +
   geom_polygon(data = indonesia_map, aes(x = long, y = lat, group = group), fill = "grey20") +
@@ -267,7 +288,7 @@ grav_network <- ggplot() +
   ylim(-9, -5) +     
   theme_minimal() +  
     geom_curve(data = edges_sf, 
-             aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, size = flow), 
+             aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*(flow) ), 
              curvature = 0.3, color = col.2, lineend = "round", alpha = 0.7, show.legend = FALSE) +
   geom_text(data = nodes_df, aes(x = X, y = Y, label = name), color = 'white', hjust = -0.2, vjust = -0.2) +
   geom_point(data = nodes_df, aes(x = X, y = Y), size = 4, color = col.1, alpha = 0.9) +
