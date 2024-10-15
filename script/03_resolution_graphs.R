@@ -1,11 +1,17 @@
-# Required libraries
-library(terra)  # For reading and working with raster data
-library(ggplot2)  # For creating graphs
-library(dplyr)  # For data manipulation
-library(tidyr)  # For data reshaping
-#----------------------
+#------------------------------0
+# Resolition downscale effects - from 100 m to 5000 km
+# R. Muylaert 2024
+#-------------------------------
+
+library(terra)  
+library(ggplot2) 
+library(dplyr) 
+library(tidyr)  
+library(viridis)
+
 
 setwd('E://')
+
 # Define the working resolutions
 resolutions <- c(100, 200, 300, 400, 500, 1000, 2000, 5000)
 
@@ -40,36 +46,50 @@ gather_values <- function(resolution) {
 }
 
 # gather_values for all rasters
-
 for (res in resolutions) {
   data_df <- rbind(data_df, gather_values(res))
 }
 
 tail(data_df)
 str(data_df$Metric)
-table(data_df$Resolution)
+ 
+# From 18 milion to 12k!
+res_ncell <- table(data_df$Resolution)
 
-# Convert 'Resolution' to a factor for better ordering in the plot
+res_ncelldf <- data.frame(res_ncell)
 
+colnames(res_ncelldf) <- c('Resolution','N')
+
+res_ncelldf
+
+# Factorise
 data_df$Resolution <- factor(data_df$Resolution, levels = resolutions)
 
-library(viridis)
+# Plotting annotation on N and Resolution
 
-# Plot the violin plots using ggplot2 with a viridis color palette
-my_plot <- ggplot(data_df, aes(x = as.factor(Resolution), y = Value)) +
+res_ncelldf$Resolution <- as.numeric(as.character(res_ncelldf$Resolution))
+str(res_ncelldf)
+
+# X lab
+cuslab <- paste0(res_ncelldf$Resolution, ' m ', '\n', '(N=',  res_ncelldf$N, ')')
+cuslab
+
+# Plot 
+my_plotn <- ggplot(data_df, aes(x = as.factor(Resolution), y = Value)) +
   geom_violin(aes(fill = as.factor(Resolution)), scale = "width", trim = FALSE) +
-  scale_fill_viridis(discrete = TRUE) +  # Use the viridis color palette
+  scale_fill_viridis(discrete = TRUE) +  
   facet_wrap(~ Metric, scales = "free_y") +
-  labs(title = "",
-       x = "Resolution (meters)",
-       y = "Value") +
+  labs(title = "", x = "Resolution",  y = "Value") +
   theme_minimal() +
-  theme(legend.position = "none")  # Hide legend for Resolution
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  scale_x_discrete(labels = cuslab)
 
+my_plotn
 
 # Export
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 
-ggsave("scale_effect.tif", plot = my_plot, width = 12, height = 5, dpi = 300)
+ggsave("scale_effect.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
 
 #---------------------------------------------------

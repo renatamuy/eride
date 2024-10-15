@@ -59,7 +59,7 @@ rgrass::execGRASS("g.list", type = "raster")
 
 # Define the desired extent in geographic coordinates (degrees)
 
-java_extent <- c(105.0, 115.5, -8.0, -6.0)
+java_extent <- c(104.8, 116, -9.0, -5.0)
 
 # Create the bounding box
 
@@ -84,7 +84,7 @@ west_3857 <- st_bbox(bbox_3857)["xmin"]
 
 # Resolution values
 
-resolution_values <- c(100, 200, 300, 400, 500, 1000, 2000, 5000)
+resolution_values <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
 
 for (wres in resolution_values) {
   message("Running for resolution: ", wres)

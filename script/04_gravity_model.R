@@ -230,10 +230,10 @@ indonesia_map <- world_map %>%
 # Create a ggplot map of Indonesia
 ggplot() +
   geom_polygon(data = indonesia_map, aes(x = long, y = lat, group = group), fill = "grey70") +
-  coord_fixed(1.3) +  # Adjust the aspect ratio
-  xlim(103, 117) +    # Set x limits to zoom in on Java
-  ylim(-9, -5) +      # Set y limits to zoom in on Java
-  theme_minimal() +   # Minimal theme for cleaner look
+  coord_fixed(1.3) +  
+  xlim(103, 117) +    
+  ylim(-9, -5) +      
+  theme_minimal() +   
   labs(title = "")
 
 
