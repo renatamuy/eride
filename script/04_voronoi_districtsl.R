@@ -1,7 +1,10 @@
+# Voronoi tesselation in grass for delimiting high-pop centres
+# Renata Muylaert 2024
 
 require(rgrass)
 require(terra)
 require(sf)
+require(here)
 
 #setwd('C://Users//rdelaram//Documents//GitHub//eride//data//')
 # Find a spacious dir
@@ -69,69 +72,267 @@ execGRASS("r.reclass", input="pop", output="above_95th_percentile", rules=rules_
 
 rgrass::execGRASS("g.list", type = "raster")
 
-
 system("r.report map=above_95th_percentile units=c,p")
+
 pixel_count <- execGRASS("r.stats", input = "above_95th_percentile", flags = c("n", "quiet"), intern = TRUE)
 pixel_count
 
 
-# Step 1: Convert the 90th percentile raster to points
-execGRASS("r.to.vect", input="above_95th_percentile", output="percentile_points", type="point")
+#  all 0 values to NULL
+execGRASS("r.mapcalc", expression = "above_95th_masked = if(above_95th_percentile == 0, null(), above_95th_percentile)")
 
 
-# Step 2: Run Voronoi tessellation on the points
-execGRASS("v.voronoi", input="percentile_points", output="voronoi_polygons")
+execGRASS("r.out.gdal", input = "above_95th_masked", output = "above_95th_masked.tif", format = "GTiff", flags = "f")
+
+raster_above_95th <- rast("above_95th_masked.tif")
+
+plot(raster_above_95th, main = "Above 95th Percentile Masked Raster", col = c("lightblue", "darkred"))
+
+# Step 2: Use r.univar to count the number of 1s
+r_stats <- execGRASS("r.univar", map = "above_95th_masked", flags = c("g", "t"), intern = TRUE)
+
+rgrass::execGRASS("g.list", type = "raster")
+
+r_stats <- read.table(text = r_stats, sep = "=")  # Convert the output into a table
+
+r_stats
+
+
+# -s   Generate random seed (result is non-deterministic)
+
+execGRASS("r.random", input = "above_95th_masked", vector = 'high_pop_points', npoints = '100',  flags = "s")
+
+rgrass::execGRASS("g.list", type = "vector")
+
+# Export shapefile to inspect distribution
+execGRASS("v.out.ogr", input="high_pop_points", output="high_pop_points.shp", format="ESRI_Shapefile")
+
+
+# -----------
+# Voronoi building
+
+
+# Run Voronoi tessellation 
+execGRASS("v.voronoi", input="high_pop_points", output="voronoi_polygons", flags = c("overwrite"))
 
 # Optional Step 3: Convert Voronoi polygons back to a raster
-execGRASS("v.to.rast", input="voronoi_polygons", output="voronoi_raster", use="cat")
+#execGRASS("v.to.rast", input="voronoi_polygons", output="voronoi_raster", use="cat")
 
 # Export Voronoi polygons to a shapefile
-
 execGRASS("v.out.ogr", input="voronoi_polygons", output="voronoi_polygons.shp", format="ESRI_Shapefile")
 
 voronoi_polygons <- st_read("voronoi_polygons.shp")
 
+
+#--------------------------------------------------------------------------------------------
+
+# Add raster_above_95th to this plot
 
 ggplot() +
   geom_sf(data = voronoi_polygons, fill = "lightblue", color = "black", lwd = 0.5) +
   theme_minimal() +
   labs(title = "Voronoi Polygons")
 
+plot(raster_above_95th, main = "Above 95th Percentile Masked Raster", col = c("lightblue", "darkred"))
 
 
+# Too SLOW
 
-## Check rast back from GRASS to R (can be SLOW)
-#raster_back <- read_RAST("pop", return_format = "terra") 
+#  geom_raster(data = as.data.frame(raster_above_95th, xy = TRUE), 
+ #             aes(x = x, y = y, fill = layer)) +
 
 
-
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
+# Now force that to our districts
 
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
-
 
 keep <- c("Banten",
           "West Java", 
           "Central Java",   
           "Yogyakarta"  ,
-          "East Java"      ) # "Bali"
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
-
-vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
+          "East Java"  , "Bali"    ) # 
 
 regions <- read_sf(vector_file)
 
 regions <- regions[regions$name_en %in% keep, ]
 
+# Zooming in
+bbox <- st_bbox(regions) 
+
+intersection <- st_intersection(regions, voronoi_polygons)
+
+exploded_regions <- st_union(regions)
+
+plot(exploded_regions)
+
+masked_voronoi <- st_intersection(voronoi_polygons, exploded_regions)
+
+masked_voronoi <- st_sf(masked_voronoi)
+
+# Get attributes from regions
+regions_attr <- regions %>% 
+  select(name)  
+
+# Join the attributes based on spatial intersection
+
+#if a cat falls within multiple regions, it will duplicate the entries in masked_voronoi 
+# for each intersecting region.
+#Therefore, it does not automatically determine which region has the majority of the area covered by a cat.
+
+masked_voronoij <- masked_voronoi %>%
+  st_join(regions_attr, join = st_intersects)
+
+# Create the voronoi_id column
+
+
+masked_voronoik <- masked_voronoij %>%
+  mutate(voronoi_id = paste(name, cat, sep = "_"))  # Create voronoi_id
+
+plot(masked_voronoik)
+
+masked_voronoik$voronoi_id
+
+# Export 
+
+#st_write(intersection, "high_pop_voronoi_java.shp", delete_dsn = TRUE)
+#st_write(masked_voronoi, "high_pop_voronoi_java_mask_id.shp", delete_dsn = TRUE)
 
 
 
 
+# We want 1 cat - 1 region - A voronoi should be forced to one district only based on area
+# Because of that, we get majority of area covered so every voronoi is only attributed to one region
+
+# Join the attributes based on spatial intersection
+
+intersected_data <- masked_voronoik %>%
+  st_join(regions_attr, join = st_intersects)
+
+intersected_data
+
+intersected_data <- intersected_data %>%
+  mutate(area = st_area(geometry))  # Add a column for area
+
+intersected_data
+
+# Group by cat and name, then summarize to find the region with the maximum area for each cat
+majority_regions <- intersected_data %>%
+  group_by(cat, name.x) %>%
+  summarise(total_area = sum(area), .groups = 'drop') %>%
+  group_by(cat) %>%
+  slice(which.max(total_area)) %>%
+  ungroup() %>%
+  select(cat, name.x)  # Select only necessary columns
+
+majority_regionsy <- intersected_data %>%
+  group_by(cat, name.y) %>%
+  summarise(total_area = sum(area), .groups = 'drop') %>%
+  group_by(cat) %>%
+  slice(which.max(total_area)) %>%
+  ungroup() %>%
+  select(cat, name.y)  # Select only necessary columns
+
+majority_regionsy
+
+nrow(majority_regions)
+majority_regions
+
+# Perform left join with masked_voronoi to get the majority region for each cat
+masked_voronoi1 <- masked_voronoi %>%
+  left_join(data.frame(majority_regions), by = "cat")
+
+masked_voronoi1y <- masked_voronoi %>%
+  left_join(data.frame(majority_regionsy), by = "cat")
 
 
+colnames(masked_voronoi1)
+
+# Create the voronoi_id column - forcing a voronoi to belong to only one region
+masked_voronoi2 <- masked_voronoi1 %>%
+  mutate(voronoi_id = paste(name.x, cat, sep = "_"))  # Use majority region's name
 
 
+masked_voronoi2y <- masked_voronoi1y %>%
+  mutate(voronoi_id = paste(name.y, cat, sep = "_"))  
+
+nrow(masked_voronoi2)
+nrow(masked_voronoi2y)
+head(masked_voronoi2)
+head(masked_voronoi2y)
+
+
+# Plot of 1 cat one region
+vorplot_forced <- ggplot() +
+  geom_sf(data = regions, aes(fill = name), color = "black", alpha = 0.5) +  
+  geom_sf(data = masked_voronoi2, fill = "white", color = "gray30", alpha = 0.4) + 
+  geom_sf_text(data = regions, aes(label = name), size = 3, color = "black", check_overlap = TRUE) + 
+  geom_sf_text(data = masked_voronoi2, aes(label = voronoi_id), size = 3, color = "black", check_overlap = TRUE) + 
+  xlim(bbox[c("xmin", "xmax")]) + 
+  ylim(bbox[c("ymin", "ymax")]) +
+  theme_minimal() +
+  labs(title = "High-Pop based Voronoi Polygons forced to districts by majority of area") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_viridis_d(name = "Districts")
+
+
+vorplot_forcedy <- ggplot() +
+  geom_sf(data = regions, aes(fill = name), color = "black", alpha = 0.5) +  
+  geom_sf(data = masked_voronoi2y, fill = "white", color = "gray30", alpha = 0.4) + 
+  geom_sf_text(data = regions, aes(label = name), size = 3, color = "black", check_overlap = TRUE) + 
+  geom_sf_text(data = masked_voronoi2, aes(label = voronoi_id), size = 3, color = "black", check_overlap = TRUE) + 
+  xlim(bbox[c("xmin", "xmax")]) + 
+  ylim(bbox[c("ymin", "ymax")]) +
+  theme_minimal() +
+  labs(title = "High-Pop based Voronoi Polygons forced to districts by majority of area") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_viridis_d(name = "Districts")
+
+# Check this  - Why is Bali_96 not in Timur????
+vorplot_forced # weird Bali
+vorplot_forcedy #ALSO weird Bali
+table(masked_voronoi2$cat)
+table(masked_voronoi2$voronoi_id)
+table(masked_voronoi2$name.x)
+
+table(masked_voronoi2y$name.y)
+
+vorplot
+
+# Plot without forcing regions
+vorplot <- ggplot() +
+  geom_sf(data = regions, aes(fill = name), color = "black", alpha = 0.5) +  
+  geom_sf(data = masked_voronoi, fill = "white", color = "gray30", alpha = 0.4) + 
+  geom_sf_text(data = regions, aes(label = name), size = 3, color = "black", check_overlap = TRUE) + 
+  xlim(bbox[c("xmin", "xmax")]) + 
+  ylim(bbox[c("ymin", "ymax")]) +
+  theme_minimal() +
+  labs(title = "Districts High-Pop based Voronoi Polygons") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_viridis_d(name = "Districts")
+
+vorplot
+
+# Voronois per distict
+
+rowSums(table(intersection$name, intersection$cat))
+
+voronoi_polygons$cat
+
+# Export shapefile 
+
+setwd('results')
+
+st_write(masked_voronoi2, "districts_high_pop_voronoi_cat_forced.shp", delete_dsn = TRUE)
+
+st_write(masked_voronoi2y, "districts_high_pop_voronoi_cat_forcedy.shp", delete_dsn = TRUE)
+
+
+data.frame(masked_voronoi2$name.y, masked_voronoi2$voronoi_id)
+
+# Export fig 
+
+ggsave("districts_high_pop_voronoi_polygons_intersect.jpg", vorplot, width = 10, height = 8, dpi = 300)
+
+ggsave("districts_high_pop_voronoi_cat_forced.jpg", vorplot, width = 10, height = 8, dpi = 300)
+
+#-------------------------------------------------------------------------------------------------------------
