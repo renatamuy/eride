@@ -1,7 +1,6 @@
 # java zonal - gravity model
 
 gc()
-
 require(terra)
 require(rgrass)
 require(rnaturalearth)
@@ -17,15 +16,6 @@ library(sfnetworks)
 library(ggspatial)
 
 #--------------------------------------------------------------------------------------------
-# Provinces to keep
-keep <- c("Banten",
-          "West Java", 
-          "Central Java",   
-          "Yogyakarta"  ,
-          "East Java"      ) # "Bali"
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
 
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
 
@@ -177,6 +167,8 @@ fig_grav <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow, fill =
     axis.title.y = element_text(size = 14),                        
     plot.title = element_text(size = 16, hjust = 0.5) ) +
   scale_fill_manual(values = rev(get_pal("Kereru"))) 
+
+fig_grav
 
 ggsave(filename= 'fig_contribution_grav_100m.tif', dpi=400, width=15, height = 17, units = 'cm')
 

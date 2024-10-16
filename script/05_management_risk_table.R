@@ -14,6 +14,8 @@ library(maps)
 library(sfnetworks)
 library(ggspatial)
 library(exactextractr)
+library(biscale)
+library(cowplot)
 
 # Get management rast
 
@@ -22,17 +24,6 @@ lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_wi
 manrast <- rast(lesiv)
   
 plot(manrast)
-
-# Get shapefile of districts
-
-keep <- c("Banten",
-          "West Java", 
-          "Central Java",   
-          "Yogyakarta"  ,
-          "East Java"      ) # "Bali"
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
 
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
 regions <- read_sf(vector_file)
@@ -120,23 +111,26 @@ custom_palette <- c(
 
 
 # Create the bar plot with the manual palette
+
+
 landcov_fracs %>%
   filter(!is.na(value)) %>%
   ggplot(aes(x = name, y = freq, fill = Type_Specific)) +
   geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
   labs(title = "",
        x = "Region",
        y = "Proportion",
        fill = "Land cover type") +
   #scale_fill_manual(values = custom_palette) +  
-  #scale_fill_manual(values = rev(get_pal("Kotare"))) +
-  scale_fill_grey()+
+  scale_fill_manual(values = rev(get_pal("Pohutukawa"))) +
+  #scale_fill_grey()+
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right')
 
 
-## Open PAR file
 
+## Open PAR file
 
 setwd('results')
 regions_updated
@@ -153,9 +147,69 @@ regions_updated_PAR <- regions_updated %>%
 nrow(regions_updated_PAR)
 regions_updated_PAR$manag_53
 
+table_management_districts <- landcov_fracs %>%
+  filter(!is.na(value)) %>%
+  group_by(name) %>%
+  arrange(desc(freq), .by_group = TRUE)
 
-library(biscale)
-library(cowplot)
+
+colnames(regions_updated_PAR)
+
+# Scatterplot of variation in PAR according to management type
+colnames(regions_updated_PAR)
+
+manag_labels <- data.frame(
+  manag_type = c("manag_11", "manag_20", "manag_31", "manag_32", "manag_40", "manag_53"),
+  Type_Broad = c("No management", "Managed", "Managed", "Managed", "Managed", "Managed"),
+  Type_Specific = c("No management", "Managed low-level", "Managed long time", "Managed short time", "Managed oil Palm", "Managed agroforestry")
+)
+
+
+landcov_long <- regions_updated_PAR %>%
+  pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
+               names_to = "manag_type", values_to = "manag_value")
+
+landcov_longl <- landcov_long %>%
+  left_join(manag_labels, by = "manag_type")
+
+colnames(landcov_longl)
+
+landcov_longl$Type_Specific
+
+# Create the scatterplot
+
+fig_land_par <- landcov_longl %>% 
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
+  ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
+  geom_point(size=3) +
+  #facet_wrap(~Type_Specific)+
+  geom_smooth(method = "lm", aes(group = Type_Specific), se = FALSE, size=1.6) +  
+  labs(x = "% Land cover", y = "PAR", color = "Management type") +
+  #scale_color_grey()+
+  scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  theme_minimal() +  theme(legend.position = "right") 
+
+fig_land_par
+
+ggsave("fig_land_par_col.png", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("fig_land_par_col.jpg", fig_land_par, width = 8, height =4, dpi = 300)
+
+
+landcov_long %>% 
+filter(manag_type == "manag_11") %>% 
+ggplot(aes(x = manag_value, y = PAR, color = manag_type)) +
+  geom_point(size=4) +
+  geom_smooth(method = "lm", aes(group = manag_type), se = FALSE) +  
+    labs(x = "% Non-managed forest", y = "PAR", color = "Management Type") +
+  scale_color_grey()+
+  theme_minimal() +  theme(legend.position = "none") 
+
+
+
+# export tibble as df
+#xlsx::write.xlsx2(data.frame(table_management_districts), sheetName='Table', 
+#                  file = 'Table_management_districts.xlsx', row.names = FALSE)
+
 # A 
 data <- bi_class(regions_updated_PAR, x = PAR, y = manag_11, style = "quantile", dim = 3)
 
@@ -168,7 +222,9 @@ map <- ggplot() +
     title = "",
     subtitle = "A."
   ) +
-  geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
+  #geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
+  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size = 2, color = "black", 
+                                 show.legend = FALSE) +
   bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
@@ -197,7 +253,9 @@ mapb <- ggplot() +
     title = "",
     subtitle = "B."
   ) +
-  geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
+  #geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
+  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size = 2, color = "black", 
+                                 show.legend = FALSE) +
   bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
@@ -221,7 +279,7 @@ bivfigs_long <- cowplot::ggdraw() +
 
 bivfigs_long
 
-ggsave(filename = "fig_risk_management_long.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "fig_risk_management.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
 
 #--------------------------------------

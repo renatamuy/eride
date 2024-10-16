@@ -20,7 +20,7 @@ rgrass::initGRASS(gisBase = grassDir,
 
 # Step 2: Set the region for Java Island using degrees for ease
 
-java_extent <- c(west = 105.0, east = 115.5, south = -8.0, north = -6.0)
+java_extent <- c(west = 105.0, east = 116, south = -9.0, north = -6.0)
 
 wres <- 30  # Set your desired resolution
 

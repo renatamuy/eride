@@ -12,6 +12,8 @@ library(maps)
 library(sfnetworks)
 library(ggspatial)
 library(exactextractr)
+library(biscale)
+library(cowplot)
 
 # Get management rast
 
@@ -19,20 +21,10 @@ lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_wi
 
 manrast <- rast(lesiv)
   
-# Get shapefile of a subset districts (optional)
-
-keep <- c("Banten",
-          "West Java", 
-          "Central Java",   
-          "Yogyakarta"  ,
-          "East Java", "Bali"      ) # 
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
-
+# Open voronoi
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/results//regions_voronoi_forced_PAR.shp" 
+
 regions <- read_sf(vector_file)
-#regions <- regions[regions$name_x %in% keep, ] # Be aware of change in cols here
 
 regions
 
@@ -79,21 +71,7 @@ rowSums(landcov_wide[1,2:6])
 regions_updated <- regions %>%
   left_join(landcov_wide, by = "voronoi_id")
 
-
-ggplot(data = regions_updated) +
-  geom_sf(aes(fill = manag_11), color = NA) +  
-  scale_fill_viridis_c(option = "viridis", name = "Non-Managed Area") +  # Use viridis color scale
-  labs(title = "Land Cover by Management Type",
-       subtitle = "Distribution of Non-Managed Area",
-       x = "Longitude",
-       y = "Latitude") +
-  theme_minimal() +
-  theme(legend.position = "right") 
-
-# -------------
-head(regions_updated$manag_11)
-
-# General map for exploration
+# exploration
 
 ggplot(data = regions_updated) +
   geom_sf(aes(fill = manag_11), color = NA) +  
@@ -106,35 +84,29 @@ ggplot(data = regions_updated) +
   theme(legend.position = "right") 
 
 
-custom_palette <- c(
-  "No management" = "snow2",         
-  "Managed low-level" = "snow3",     
-  "Managed long time" = "#8c564b",     
-  "Managed short time" = "salmon",    
-  "Managed oil Palm" = "firebrick",       
-  "Managed agroforestry" = "lightskyblue"    
-)
+# bar plot
 
+landcov_fracs <- landcov_fracs %>%
+  mutate(name = factor(stringr::str_extract(voronoi_id, "^[^_]+")) )
 
-# Create the bar plot with the manual palette
+  
 landcov_fracs %>%
   filter(!is.na(value)) %>%
-  ggplot(aes(x = voronoi_id, y = freq, fill = Type_Specific)) +
+  ggplot(aes(x = name, y = freq, fill = Type_Specific)) +
   geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  facet_wrap(~Type_Broad  ) +
   labs(title = "",
        x = "Region",
        y = "Proportion",
        fill = "Land cover type") +
-  #scale_fill_manual(values = custom_palette) +  
-  #scale_fill_manual(values = rev(get_pal("Kotare"))) +
-  scale_fill_grey()+
+  scale_fill_manual(values = rev(get_pal("Pohutukawa")) ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right')
 
 
-## Open PAR file
+# Open PAR file
 setwd('results')
-regions_updated
 st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
 
 #-----------------
@@ -147,12 +119,59 @@ data.frame(regions_PAR[c('voronoi_id', 'PAR')])
 regions_updated_PAR <- regions_updated %>%
   left_join(data.frame(regions_PAR[c('voronoi_id', 'PAR')]))
 
-nrow(regions_updated_PAR)
-regions_updated_PAR$manag_53
 
 
-library(biscale)
-library(cowplot)
+# after creating regions_updated_PAR
+
+table_management_districts <- landcov_fracs %>%
+  filter(!is.na(value)) %>%
+  group_by(name) %>%
+  arrange(desc(freq), .by_group = TRUE)
+
+colnames(regions_updated_PAR)
+
+# Scatterplot of variation in PAR according to management type
+colnames(regions_updated_PAR)
+
+manag_labels <- data.frame(
+  manag_type = c("manag_11", "manag_20", "manag_31", "manag_32", "manag_40", "manag_53"),
+  Type_Broad = c("No management", "Managed", "Managed", "Managed", "Managed", "Managed"),
+  Type_Specific = c("No management", "Managed low-level", "Managed long time", "Managed short time", "Managed oil Palm", "Managed agroforestry")
+)
+
+
+landcov_long <- regions_updated_PAR %>%
+  pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
+               names_to = "manag_type", values_to = "manag_value")
+
+landcov_longl <- landcov_long %>%
+  left_join(manag_labels, by = "manag_type")
+
+colnames(landcov_longl)
+
+landcov_longl$Type_Specific
+
+# Create the scatterplot
+
+fig_land_par <- landcov_longl %>% 
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
+  ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
+  geom_point(size=3) +
+  #facet_wrap(~Type_Specific)+
+  geom_smooth(method = "gam", aes(group = Type_Specific), se = FALSE, size=1.6) +  
+  labs(x = "% Land cover", y = "PAR", color = "Management type") +
+  #scale_color_grey()+
+  scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  theme_minimal() +  theme(legend.position = "right") 
+
+fig_land_par
+
+# Save
+
+ggsave("fig_land_par_voronoi_gam_col.png", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("fig_land_par_voronoi_gam_col.jpg", fig_land_par, width = 8, height =4, dpi = 300)
+
+
 # A 
 data <- bi_class(regions_updated_PAR, x = PAR, y = manag_11, style = "quantile", dim = 3)
 
@@ -222,8 +241,8 @@ bivfigs_long <- cowplot::ggdraw() +
 
 bivfigs_long
 
-ggsave(filename = "fig_risk_management_long_voronoi_sflab.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "fig_risk_management_voronoi.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
-ggsave(filename = "fig_risk_management_long_voronoi_sflab.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "fig_risk_management_voronoi.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
 #--------------------------------------

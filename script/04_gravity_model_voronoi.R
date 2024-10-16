@@ -17,22 +17,12 @@ library(sfnetworks)
 library(ggspatial)
 
 #--------------------------------------------------------------------------------------------
-# Provinces to keep
-keep <- c("Banten",
-          "West Java", 
-          "Central Java",   
-          "Yogyakarta"  ,
-          "East Java"      ) # "Bali"
-
-#subset_districts <- ind_districts[ind_districts$name_en %in% keep, ]
-#sf::st_write(subset_districts, 'subset_districts.shp')
 
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/results//districts_high_pop_voronoi_cat_forced.shp" 
 
 #epsg 3857
 
 regions <- read_sf(vector_file)
-regions <- regions[regions$name_en %in% keep, ]
 
 # be aware they are multi-polygon regions
 centroids <- st_centroid(regions) # add pop raster 
@@ -40,20 +30,6 @@ centroids <- st_centroid(regions) # add pop raster
 
 # get raster of population at risk at the desired resolution
 raster_data <- terra::rast("E://PAR_100.tif")
-
-#plot(regions['name'])
-#plot(raster_data, add=TRUE)
-
-#raster_data_df <-  na.omit(as.data.frame(raster_data, xy = TRUE))
-
-#
-#ggplot() +
-  #geom_tile(data = raster_data_df, aes(x = x, y = y, fill = PAR)) +  
- # geom_sf(data = regions, aes(color = name), fill= 'transparent',col="black", size=0.50) +  
- #  viridis::scale_fill_viridis(discrete = FALSE) +
-  #labs(title = "") + 
-  #theme_bw()
-
 
 # zonal - average
 
@@ -155,7 +131,7 @@ risk_contribution_long$Region <- factor(risk_contribution_long$Name_A,
 
 
 # Export
-setwd('results')
+setwd('C://Users//rdelaram//Documents//GitHub//eride/results')
 
 write.csv(gravity_data, file = 'gravity_model_voronoi_results.csv')
 
@@ -185,7 +161,6 @@ fig_grav_voronoi <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow
 fig_grav_voronoi
 
 ggsave(filename= 'fig_contribution_grav_voronoi_100m.tif', dpi=400, width=28, height = 25, units = 'cm')
-
 ggsave(filename= 'fig_contribution_grav_voronoi_100m.png', dpi=400, width=28, height = 25, units = 'cm')
 
 
@@ -203,14 +178,14 @@ edge_list <- network_data %>%
 centroid_coords <- st_coordinates(centroids)
 
 # Create a data frame for nodes that includes coordinates
-coords_df <- data.frame(name = centroids$voronoi_id, X = centroid_coords[, 1], Y = centroid_coords[, 2])
+coords_df <- data.frame(voronoi_id = centroids$voronoi_id, X = centroid_coords[, 1], Y = centroid_coords[, 2])
 
 # Print the coordinates data frame to check its structure
 print(head(coords_df))
 
 # Create a data frame of unique nodes for the edge list and merge coordinates
-nodes_df <- data.frame(name = unique(c(edge_list$from, edge_list$to)), stringsAsFactors = FALSE) %>%
-  left_join(coords_df, by = "name")
+nodes_df <- data.frame(voronoi_id = unique(c(edge_list$from, edge_list$to)), stringsAsFactors = FALSE) %>%
+  left_join(coords_df, by = "voronoi_id")
 
 # this tbl_graph approach did not work... so I moved on to sfnetworks
 graph_object <- tbl_graph(nodes = nodes_df, edges = edge_list)
@@ -295,7 +270,7 @@ grav_network <- ggplot() +
     geom_curve(data = edges_sf, 
              aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*sqrt(flow) ), 
              curvature = 0.3, color = col.2, lineend = "round", alpha = 0.7, show.legend = FALSE) +
-  geom_text(data = nodes_df, aes(x = X, y = Y, label = name), color = 'white', hjust = -0.2, vjust = -0.2) +
+  geom_text(data = nodes_df, aes(x = X, y = Y, label = voronoi_id), color = 'white', hjust = -0.2, vjust = -0.2) +
   geom_point(data = nodes_df, aes(x = X, y = Y), size = 4, color = col.1, alpha = 0.9) +
   scale_size_continuous(range = c(0.1, 3)) +  
   theme_void() +
@@ -308,20 +283,21 @@ grav_network <- ggplot() +
 
 grav_network
 
-# Getting just the top 20 links
+#
+ggsave(filename= 'fig_grav_network_100m_voronoi.png', dpi=400, width=18, height = 10, units = 'cm')
 
-table(top_edges_sf$flow > 15)
+# Getting just the top 20 links
 
 top_edges_sf <- edges_sf %>%
   filter(flow > 15)     
 
+table(top_edges_sf$flow > 15)
 nrow(top_edges_sf)
 unique(top_edges_sf$from)
 
+top_nodes_sf <- nodes_df[nodes_df$voronoi_id %in% top_edges_sf$from,]
 
-top_nodes_sf <- nodes_df[nodes_df$name %in% top_edges_sf$from,]
-
-
+# Fig top flows
 grav_network_top <- ggplot() +
   geom_polygon(data = indonesia_map, aes(x = long, y = lat, group = group), fill = "grey20") +
   coord_fixed(1.3) + 
@@ -331,7 +307,7 @@ grav_network_top <- ggplot() +
   geom_curve(data = top_edges_sf,  
              aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*(flow) ), 
              curvature = 0.3, color = col.2, lineend = "round", alpha = 0.7, show.legend = FALSE) +
-  geom_text(data = top_nodes_sf, aes(x = X, y = Y, label = name), color = 'white', size = 1.5, hjust = -0.2, vjust = -0.2) +
+  geom_text(data = top_nodes_sf, aes(x = X, y = Y, label = voronoi_id), color = 'white', size = 1.5, hjust = -0.2, vjust = -0.2) +
   geom_point(data = top_nodes_sf, aes(x = X, y = Y), size = 2, color = col.1, alpha = 0.9) +
   scale_size_continuous(range = c(0.1, 3)) +  
   theme_void() +
@@ -341,8 +317,6 @@ grav_network_top <- ggplot() +
 grav_network_top
 
 ggsave(filename= 'fig_grav_network_100m_voronoi_15plus.tif', dpi=400, width=18, height = 10, units = 'cm')
-
 ggsave(filename= 'fig_grav_network_100m_voronoi_15plus.png', dpi=400, width=18, height = 10, units = 'cm')
-
 
 #---------------------------------------------------------------------------------------------------------

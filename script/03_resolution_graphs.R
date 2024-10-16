@@ -13,7 +13,7 @@ library(viridis)
 setwd('E://')
 
 # Define the working resolutions
-resolutions <- c(100, 200, 300, 400, 500, 1000, 2000, 5000)
+resolutions <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
 
 # Initialize an empty data frame to store the results
 data_df <- data.frame(Resolution = integer(), Metric = character(), Value = numeric(), stringsAsFactors = FALSE)
@@ -89,7 +89,7 @@ my_plotn
 # Export
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 
-ggsave("scale_effect.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
-ggsave("scale_effect.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect_11.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect_11.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
 
 #---------------------------------------------------
