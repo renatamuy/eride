@@ -59,9 +59,6 @@ manag_labels <- data.frame(
 merged_datal <- merged_data %>%
   left_join(manag_labels, by = "manag_type")
 
-str(merged_datal)
-
-
 summary(merged_datal$PAR)
 
 # Create the scatterplot
@@ -84,6 +81,7 @@ fig_land_par
 ggsave("fig_land_par_pixel.png", fig_land_par, width = 4, height =4, dpi = 300)
 ggsave("fig_land_par_pixel.jpg", fig_land_par, width = 4, height =4, dpi = 300)
 
+# ---------------- Cumulative risk
 
 require(oneimpact)
 library (rasterVis)
@@ -95,17 +93,18 @@ require(RColorBrewer)
 1000 * 100 # 100 km
 1000 * 1000 # 100 km
 
-zoi_values <- c(1000 * 100)
+# 55943916 cells
+zoi_values <- c(1000 * 1000)
 
 risk_1km <- calc_zoi_cumulative(parr, type = "Gauss", radius = zoi_values)
+
+names(risk_1km)
 
 myPal <- rev(RColorBrewer::brewer.pal('Spectral', n=4))
 
 selected_colours <- c("#5FA1F7", "#83A552","#9B1F1A")
-
 selected_colours <- get_pal("Pohutukawa") #[c(1,2,3,4)]
 myPal <- colorRampPalette(selected_colours)(100)
-
 myTheme <- rasterTheme(region = myPal)
 
 rasterVis::levelplot(risk_1km, par.settings = myTheme, main='Received risk (100 km)')
@@ -115,14 +114,20 @@ risk_df <- as.data.frame(risk_1km, xy = TRUE, na.rm = TRUE)
 head(risk_df)
 nrow(risk_df)
 
+colnames(risk_df) <- c('x', 'y', 'zoi_cumulative_1000km' )
+
+write.csv(risk_df, 'risk_df_1000km.csv', row.names = FALSE)
+
+# map 
+
 zoi_map <- ggplot() +
-  geom_tile(data = risk_df, aes(x = x, y = y, fill = zoi_cumulative_Gauss1000)) +
+  geom_tile(data = risk_df, aes(x = x, y = y, fill = zoi_cumulative_100km)) +
   coord_fixed(1.3) + 
   theme_minimal() +  
   theme_void() +
-  labs(title = "Received Risk (100 km)") +
+  labs(title = "Received Risk (1000 km)") +
   scale_fill_gradient(low= "#5FA1F7", high= "#9B1F1A") + 
-  labs(fill='Cumulative Received Risk')+#  scale_fill_gradient(high= 'red', low='blue') +
+  labs(fill='Cumulative Received Risk')+
   theme(plot.background = element_rect(fill = "azure2", color = NA)) #+
 #annotation_north_arrow(location = "tr", which_north = "true", style = north_arrow_fancy_orienteering) +
 #annotation_scale(location = "bl", width_hint = 0.5, unit_category = "metric", 
@@ -131,6 +136,6 @@ zoi_map <- ggplot() +
 
 zoi_map
 
-ggsave("fig_zoi_pixel_10km.jpg", zoi_map, width = 4, height =4, dpi = 300)
+ggsave("fig_zoi_pixel_1000km.jpg", zoi_map, width = 4, height =4, dpi = 300)
 
 #----------------------------------------------------------------------------------------------
