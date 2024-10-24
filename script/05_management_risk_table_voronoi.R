@@ -107,7 +107,7 @@ landcov_fracs %>%
 
 # Open PAR file
 setwd('results')
-st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
+#st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
 
 #-----------------
 
@@ -141,7 +141,7 @@ manag_labels <- data.frame(
 
 
 landcov_long <- regions_updated_PAR %>%
-  pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
+  tidyr::pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
                names_to = "manag_type", values_to = "manag_value")
 
 landcov_longl <- landcov_long %>%
@@ -158,19 +158,70 @@ fig_land_par <- landcov_longl %>%
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
   geom_point(size=3) +
   #facet_wrap(~Type_Specific)+
-  geom_smooth(method = "gam", aes(group = Type_Specific), se = FALSE, size=1.6) +  
+  geom_smooth(method= 'gam', aes(group = Type_Specific, fill = Type_Specific), 
+              formula = y ~ s(x, bs = "cs", fx = TRUE, k = 3), se = TRUE, size=1.6, show.legend = FALSE) +
   labs(x = "% Land cover", y = "PAR", color = "Management type") +
-  #scale_color_grey()+
   scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  scale_y_log10() + 
   theme_minimal() +  theme(legend.position = "right") 
 
 fig_land_par
 
+
 # Save
 
-ggsave("fig_land_par_voronoi_gam_col.png", fig_land_par, width = 8, height =4, dpi = 300)
-ggsave("fig_land_par_voronoi_gam_col.jpg", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("fig_land_par_voronoi_gam_col_log.png", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("fig_land_par_voronoi_gam_col)_log.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
+# joyplot
+
+library(ggridges)
+
+summary(landcov_longl$PAR)
+
+#
+mean_par <- mean(landcov_longl$PAR, na.rm = TRUE)
+
+# Create new column "PAR_above_below"
+landcov_longl <- landcov_longl %>%
+  mutate(PAR_above_below = ifelse(PAR > mean_par, "high PAR", "low PAR"))
+
+
+sd_par <- sd(landcov_longl$PAR, na.rm = TRUE)
+
+thresholds <- c(mean_par - sd_par, mean_par, mean_par + sd_par)
+
+# Create new column "PAR_category"
+landcov_longl <- landcov_longl %>%
+  mutate(PAR_category = case_when(
+    PAR <= thresholds[1] ~ "very low PAR",
+    PAR > thresholds[1] & PAR <= thresholds[2] ~ "low PAR",
+    PAR > thresholds[2] & PAR <= thresholds[3] ~ "high PAR",
+    PAR > thresholds[3] ~ "very high PAR"
+  ))
+
+landcov_longl <- landcov_longl %>%
+  mutate(PAR_category = factor(PAR_category, 
+                               levels = c("very low PAR", "low PAR", "high PAR", "very high PAR")))
+
+
+#------
+par_joy <- landcov_longl %>%
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53"), !is.na(PAR_category)) %>%  # Remove NA values
+  ggplot(aes(x = manag_value, y = Type_Specific, fill = Type_Specific)) + 
+  facet_wrap(~ PAR_category, nrow = 1, scales = "fixed") + 
+  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE) +  # Ridge plot settings
+  labs(x = "% Land cover", y = "Management type", fill = "Management type") +  # Update axis labels
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4, 3, 2)]) +  # Apply the same palette
+  geom_vline(xintercept = 0.3, linetype = "dashed", color = "gray50", size = 1) +  # Add dashed line at x = 0.3
+  theme_minimal() +  
+  theme(legend.position = "right")
+
+par_joy
+
+#export
+ggsave("par_man_joy_vor.jpg", plot = par_joy, width = 10, height = 4, dpi = 300)
 
 # A 
 data <- bi_class(regions_updated_PAR, x = PAR, y = manag_11, style = "quantile", dim = 3)

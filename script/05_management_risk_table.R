@@ -23,11 +23,10 @@ lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_wi
 
 manrast <- rast(lesiv)
   
-plot(manrast)
+#plot(manrast)
 
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
 regions <- read_sf(vector_file)
-regions <- regions[regions$name_en %in% keep, ]
 
 regions
 
@@ -132,9 +131,9 @@ landcov_fracs %>%
 
 ## Open PAR file
 
-setwd('results')
+#setwd('results')
 regions_updated
-st_write(regions_updated, "management_cover.shp", append=FALSE)
+#st_write(regions_updated, "management_cover.shp", append=FALSE)
 
 regions_PAR <- read_sf('regions_PAR.shp')
 
@@ -166,7 +165,7 @@ manag_labels <- data.frame(
 
 
 landcov_long <- regions_updated_PAR %>%
-  pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
+      tidyr::pivot_longer(cols = c("manag_11", "manag_20", "manag_32", "manag_40", "manag_53"),
                names_to = "manag_type", values_to = "manag_value")
 
 landcov_longl <- landcov_long %>%
@@ -178,16 +177,20 @@ landcov_longl$Type_Specific
 
 # Create the scatterplot
 
+
 fig_land_par <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
   geom_point(size=3) +
-  #facet_wrap(~Type_Specific)+
-  geom_smooth(method = "lm", aes(group = Type_Specific), se = FALSE, size=1.6) +  
+  geom_smooth(method = "lm", aes(group = Type_Specific, fill = Type_Specific), 
+              formula = 'y ~ x', se = TRUE, size=1.6, show.legend = FALSE) +  
   labs(x = "% Land cover", y = "PAR", color = "Management type") +
-  #scale_color_grey()+
-  scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
-  theme_minimal() +  theme(legend.position = "right") 
+  #scale_y_log10() + 
+  scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +  
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +  
+  theme_minimal() +  
+  theme(legend.position = "right")
+
 
 fig_land_par
 
@@ -195,17 +198,27 @@ ggsave("fig_land_par_col.png", fig_land_par, width = 8, height =4, dpi = 300)
 ggsave("fig_land_par_col.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
 
-landcov_long %>% 
-filter(manag_type == "manag_11") %>% 
-ggplot(aes(x = manag_value, y = PAR, color = manag_type)) +
-  geom_point(size=4) +
-  geom_smooth(method = "lm", aes(group = manag_type), se = FALSE) +  
-    labs(x = "% Non-managed forest", y = "PAR", color = "Management Type") +
-  scale_color_grey()+
-  theme_minimal() +  theme(legend.position = "none") 
+
+#------
 
 
+par_joy <- landcov_longl %>%
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>%  # Remove NA values
+  ggplot(aes(x = manag_value, y = Type_Specific, fill = Type_Specific)) + 
+  #facet_wrap(~ name, nrow = 1, scales = "fixed") + 
+  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE) +  # Ridge plot settings
+  labs(x = "% Land cover", y = "Management type", fill = "Management type") +  # Update axis labels
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4, 3, 2)]) +  # Apply the same palette
+  geom_vline(xintercept = 0.3, linetype = "dashed", color = "gray50", size = 1) +  # Add dashed line at x = 0.3
+  theme_minimal() +  
+  theme(legend.position = "right")
 
+par_joy
+
+#export
+ggsave("par_man_joy.jpg", plot = par_joy, width = 10, height = 4, dpi = 300)
+
+#--
 # export tibble as df
 #xlsx::write.xlsx2(data.frame(table_management_districts), sheetName='Table', 
 #                  file = 'Table_management_districts.xlsx', row.names = FALSE)

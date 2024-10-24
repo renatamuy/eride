@@ -9,7 +9,6 @@ library(dplyr)
 library(tidyr)  
 library(viridis)
 
-
 setwd('E://')
 
 # Define the working resolutions
@@ -91,5 +90,66 @@ setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 
 ggsave("scale_effect_11.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
 ggsave("scale_effect_11.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
+
+head(data_df)
+
+
+df_summary <- data_df %>%
+  group_by(Metric, Resolution) %>%
+  summarise(
+    Mean_Value = mean(Value, na.rm = TRUE),
+    SD_Value = sd(Value, na.rm = TRUE),  # Calculate standard deviation
+    .groups = 'drop'
+  )
+
+
+df_summary
+
+pixel_info <- data.frame(Resolution = factor(resolutions), cost= res_ncelldf$N )
+
+str(pixel_info)
+
+infodf <- left_join(df_summary, pixel_info, by='Resolution' ) %>% 
+  filter(Metric=='eRIDE')
+
+
+plot( infodf$SD_Value ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information (eRIDE)')
+text(infodf$SD_Value ~ infodf$cost, labels = scale, pos = 4, col='firebrick', offset = 0.7)
+
+
+infodf$SD_loss <- 3.11 - infodf$SD_Value
+
+plot( infodf$SD_loss ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information oss (eRIDE)')
+text(infodf$SD_loss  ~ infodf$cost, labels = rev(scale), pos = 4, col='firebrick', offset = 0.7)
+
+
+ggplot(infodf, aes(x = cost, y = SD_loss)) +
+  geom_point(size = 5, shape = 19) +  
+  ggrepel::geom_text_repel(aes(label = rev(scale)),  
+                  color = 'firebrick',
+                  nudge_x = 0.1,  
+                  nudge_y = 0.1,  
+                  box.padding = 0.2,  
+                  point.padding = 0.2, 
+                  segment.color = 'grey50') + 
+  labs(x = 'Pixel Cost', y = 'SD Information Loss (eRIDE)') +  
+  theme_bw() 
+
+#-- gam
+
+ggplot(infodf, aes(x = cost, y = SD_loss)) +
+  geom_point(size = 5, shape = 19) + 
+  ggrepel::geom_text_repel(aes(label = rev(scale)),  
+                           color = 'firebrick',
+                           nudge_x = 0.1,  
+                           nudge_y = 0.1, 
+                           box.padding = 0.2, 
+                           point.padding = 0.2,  
+                           segment.color = 'grey50') + 
+  geom_smooth(method = "gam", formula = y ~ s(x, k = 4), color = "gray50", se = FALSE, linetype = "dashed") +  # Add GAM curve with k=4
+  labs(x = 'Pixel Cost', y = 'SD Information Loss (eRIDE)') +  
+  theme_bw()  # Choose a theme
+
+
 
 #---------------------------------------------------

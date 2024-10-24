@@ -72,14 +72,15 @@ fig_land_par <- merged_datal %>%
   geom_violin(aes(fill = as.factor(Type_Specific)), scale = "width", trim = FALSE) +
   scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)])+
   labs(title = "", x = "Forest management",  y = "PAR") +
+  scale_y_log10() + 
   theme_minimal() +
   theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) 
 
 fig_land_par
 
 # Save
-ggsave("fig_land_par_pixel.png", fig_land_par, width = 4, height =4, dpi = 300)
-ggsave("fig_land_par_pixel.jpg", fig_land_par, width = 4, height =4, dpi = 300)
+ggsave("fig_land_par_pixel_log.png", fig_land_par, width = 4, height =4, dpi = 300)
+ggsave("fig_land_par_pixel_log.jpg", fig_land_par, width = 4, height =4, dpi = 300)
 
 # ---------------- Cumulative risk
 
