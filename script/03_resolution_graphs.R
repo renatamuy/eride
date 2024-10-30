@@ -112,12 +112,16 @@ str(pixel_info)
 infodf <- left_join(df_summary, pixel_info, by='Resolution' ) %>% 
   filter(Metric=='eRIDE')
 
-
 plot( infodf$SD_Value ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information (eRIDE)')
 text(infodf$SD_Value ~ infodf$cost, labels = scale, pos = 4, col='firebrick', offset = 0.7)
 
+getthis <- which(infodf[,'Resolution'] == 100)
 
-infodf$SD_loss <- 3.11 - infodf$SD_Value
+
+infodf$SD_loss <- as.numeric(infodf[getthis, 'SD_Value'] ) - infodf$SD_Value
+
+write.table(file='resolution_effect_eride.txt', infodf, row.names = FALSE)
+
 
 plot( infodf$SD_loss ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information oss (eRIDE)')
 text(infodf$SD_loss  ~ infodf$cost, labels = rev(scale), pos = 4, col='firebrick', offset = 0.7)
@@ -137,7 +141,7 @@ ggplot(infodf, aes(x = cost, y = SD_loss)) +
 
 #-- gam
 
-ggplot(infodf, aes(x = cost, y = SD_loss)) +
+info_loss_plot <- ggplot(infodf, aes(x = cost, y = SD_loss)) +
   geom_point(size = 5, shape = 19) + 
   ggrepel::geom_text_repel(aes(label = rev(scale)),  
                            color = 'firebrick',
@@ -148,8 +152,47 @@ ggplot(infodf, aes(x = cost, y = SD_loss)) +
                            segment.color = 'grey50') + 
   geom_smooth(method = "gam", formula = y ~ s(x, k = 4), color = "gray50", se = FALSE, linetype = "dashed") +  # Add GAM curve with k=4
   labs(x = 'Pixel Cost', y = 'SD Information Loss (eRIDE)') +  
-  theme_bw()  # Choose a theme
+  theme_bw() 
 
+ggsave("scale_effect_SD.jpg", plot = info_loss_plot, width = 8, height = 6, dpi = 300)
+ggsave("scale_effect_SD.png", plot = info_loss_plot, width = 8, height = 6, dpi = 300)
+
+
+# Repeat for PAR
+
+infodf_PAR <- left_join(df_summary, pixel_info, by='Resolution' ) %>% 
+  filter(Metric=='PAR')
+
+infodf_PAR
+
+getthispar <- which(infodf_PAR[,'Resolution'] == 100)
+
+infodf_PAR$SD_loss <- as.numeric(infodf_PAR[getthispar, 'SD_Value'] ) - infodf_PAR$SD_Value
+
+infodf_PAR
+
+write.table(file='resolution_effect_par.txt', infodf_PAR, row.names = FALSE)
+
+
+info_loss_plot_PAR <- ggplot(infodf_PAR, aes(x = cost, y = SD_loss)) +
+  geom_point(size = 5, shape = 19) + 
+  ggrepel::geom_text_repel(aes(label = rev(scale)),  
+                           color = 'firebrick',
+                           nudge_x = 0.1,  
+                           nudge_y = 0.1, 
+                           box.padding = 0.2, 
+                           point.padding = 0.2,  
+                           segment.color = 'grey50') + 
+  geom_smooth(method = "gam", formula = y ~ s(x, k = 4), color = "gray50", se = FALSE, linetype = "dashed") +  # Add GAM curve with k=4
+  labs(x = 'Pixel Cost', y = 'SD Information Loss (PAR)') +  
+  theme_bw() 
+
+info_loss_plot_PAR
+
+
+
+ggsave("scale_effect_SD_PAR.jpg", plot = info_loss_plot_PAR, width = 8, height = 6, dpi = 300)
+ggsave("scale_effect_SD_PAR.png", plot = info_loss_plot_PAR, width = 8, height = 6, dpi = 300)
 
 
 #---------------------------------------------------

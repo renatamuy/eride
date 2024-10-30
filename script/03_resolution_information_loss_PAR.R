@@ -1,7 +1,7 @@
-# Automated extraction of values
+# Automated extracted values for PAR
 # Renata Muylaert
 
-data <- read.table('resolution_effect_eride.txt', head=TRUE)
+data <- read.table('resolution_effect_par.txt', head=TRUE)
 
 data
 
@@ -43,9 +43,8 @@ head(data)
 
 data <- data.frame(scale=data$Resolution, cost=data$cost, information=data$SD_loss)
 
-# abs diff (info loss)
+# absolute difference (information loss)
 data$information <- abs(data$information)
-
 # Log normal using a constant slope (0.3  case) 
 #lognorm_model_0p3 <- mle2(minuslogl = function(mu, sigma) {
 #  -sum(dlnorm(data$information, meanlog = mu + 0.3 * data$cost, sdlog = sigma, log = TRUE))
@@ -61,12 +60,12 @@ data$information <- abs(data$information)
 
 
 #  estimated slope through log normal
-#lognorm_model_slope <- mle2(   minuslogl = function(mu, sigma, beta) {
-#    # Calculate the log-likelihood for the log-normal distribution
-#    -sum(dlnorm(data$information, meanlog = mu + beta * data$cost, sdlog = sigma, log = TRUE))
-#  },
-#  start = list(mu = 0.5, sigma = 0.5, beta = 0.3)  # Initial value for beta
-#)
+lognorm_model_slope <- mle2(   minuslogl = function(mu, sigma, beta) {
+    # Calculate the log-likelihood for the log-normal distribution
+    -sum(dlnorm(data$information, meanlog = mu + beta * data$cost, sdlog = sigma, log = TRUE))
+  },
+  start = list(mu = 0.5, sigma = 0.5, beta = 0.3)  # Initial value for beta
+)
 
 
 # GLM model
@@ -100,12 +99,12 @@ cost_seq <- seq(min(data$cost), max(data$cost), length.out = 100)
 
 # Generate predictions for each model
 predicted_data <- data.frame( cost = cost_seq,
-  glm_pred = predict(glm_model, newdata = data.frame(cost = cost_seq), type = "response") #,
-  #exp_pred = predict(exp_model, newdata = data.frame(cost = cost_seq), type = "response"),
-  #lognorm_pred = exp(coef(lognorm_model_slope)["mu"] + 
-  #                     coef(lognorm_model_slope)["beta"] * cost_seq),
-  #lognorm_0p5_pred = exp(coef(lognorm_model_0p5)["mu"] + 
-  #                               coef(lognorm_model_0p5)["beta"] * cost_seq)
+                              glm_pred = predict(glm_model, newdata = data.frame(cost = cost_seq), type = "response") #,
+                              #exp_pred = predict(exp_model, newdata = data.frame(cost = cost_seq), type = "response"),
+                              #lognorm_pred = exp(coef(lognorm_model_slope)["mu"] + 
+                              #                     coef(lognorm_model_slope)["beta"] * cost_seq),
+                              #lognorm_0p5_pred = exp(coef(lognorm_model_0p5)["mu"] + 
+                              #                               coef(lognorm_model_0p5)["beta"] * cost_seq)
 )
 
 # Calculate confidence intervals for GLM
@@ -161,7 +160,6 @@ predicted_data$gam_pred4 <- gam_predictions$fit
 predicted_data$gam_lwr4 <- gam_predictions$fit - 1.96 * gam_predictions$se.fit
 predicted_data$gam_upr4 <- gam_predictions$fit + 1.96 * gam_predictions$se.fit
 
-
 # Plot 
 
 library(ggplot2)
@@ -181,7 +179,7 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   # GAM model
   geom_line(data = predicted_data, aes(x = cost, y = gam_pred3), color = "khaki", linetype = "dotdash", size = 1) +
   # GAM model
-  geom_line(data = predicted_data, aes(x = cost, y = gam_pred4), color = "orange", size = 1) +
+  geom_line(data = predicted_data, aes(x = cost, y = gam_pred4), color = "orange", linetype = "dotdash", size = 1) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = gam_lwr, ymax = gam_upr), fill = "orange", alpha = 0.2) +
   # Piecewise modelhttp://127.0.0.1:44635/graphics/plot_zoom_png?width=730&height=1054
   geom_line(data = predicted_data, aes(x = cost, y = piecewise_pred), color = "black",  size = 1) +
@@ -190,11 +188,11 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   labs(
     title = "Model Comparisons - Resolution effect",
     x = "Cost",
-    y = "Information loss (eRIDE)"
+    y = "Information loss (PAR)"
   ) +
   #scale_y_log10(limits = c(0.1, 30))+
   geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
-  coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
+  coord_cartesian(ylim = c(0, 13), xlim = c(0, 2.9e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
     plot.title = element_text(size = 18, face = "bold"),
@@ -208,5 +206,5 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
 plot
 
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
-ggsave("model_selection_eride_gams.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
+ggsave("model_selection_par_gams.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
 #---------------------------------------------------------
