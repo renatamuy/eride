@@ -84,7 +84,10 @@ west_3857 <- st_bbox(bbox_3857)["xmin"]
 
 # Resolution values
 
-resolution_values <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
+#resolution_values <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
+
+# Additional values to fill in the regression gaps
+resolution_values <- c(150, 250, 350, 2000, 2500, 3000, 4000)
 
 for (wres in resolution_values) {
   message("Running for resolution: ", wres)

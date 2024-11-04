@@ -12,8 +12,9 @@ library(viridis)
 setwd('E://')
 
 # Define the working resolutions
-resolutions <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
-
+# 11_scales
+#resolutions <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 5000)
+resolutions <- c(100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 4000, 5000)
 # Initialize an empty data frame to store the results
 data_df <- data.frame(Resolution = integer(), Metric = character(), Value = numeric(), stringsAsFactors = FALSE)
 
@@ -88,8 +89,8 @@ my_plotn
 # Export
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 
-ggsave("scale_effect_11.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
-ggsave("scale_effect_11.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect_N18.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect__N18.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
 
 head(data_df)
 
@@ -112,51 +113,30 @@ str(pixel_info)
 infodf <- left_join(df_summary, pixel_info, by='Resolution' ) %>% 
   filter(Metric=='eRIDE')
 
-plot( infodf$SD_Value ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information (eRIDE)')
-text(infodf$SD_Value ~ infodf$cost, labels = scale, pos = 4, col='firebrick', offset = 0.7)
+#plot( infodf$SD_Value ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information (eRIDE)')
+#text(infodf$SD_Value ~ infodf$cost, labels = scale, pos = 4, col='firebrick', offset = 0.7)
 
 getthis <- which(infodf[,'Resolution'] == 100)
 
-
 infodf$SD_loss <- as.numeric(infodf[getthis, 'SD_Value'] ) - infodf$SD_Value
 
+infodf$Mean_loss <- as.numeric(infodf[getthis, 'Mean_Value'] ) - infodf$Mean_Value
+
+infodf$SD_loss_pct <- 100 -  100* (infodf$SD_Value / as.numeric(infodf[getthis, 'SD_Value']))
+
+infodf$Mean_loss_pct <- 100 -  100* (infodf$Mean_Value / as.numeric(infodf[getthis, 'Mean_Value']))
+
+infodf$SD_retained_pct <- 100* (infodf$SD_Value / as.numeric(infodf[getthis, 'SD_Value']))
+
+infodf$Mean_retained_pct <-  100* (infodf$Mean_Value / as.numeric(infodf[getthis, 'Mean_Value']))
+
+infodf
+
+# Export 
+
+setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
+
 write.table(file='resolution_effect_eride.txt', infodf, row.names = FALSE)
-
-
-plot( infodf$SD_loss ~ infodf$cost, pch=19, cex=3, xlab='Pixel Cost', ylab=' SD Information oss (eRIDE)')
-text(infodf$SD_loss  ~ infodf$cost, labels = rev(scale), pos = 4, col='firebrick', offset = 0.7)
-
-
-ggplot(infodf, aes(x = cost, y = SD_loss)) +
-  geom_point(size = 5, shape = 19) +  
-  ggrepel::geom_text_repel(aes(label = rev(scale)),  
-                  color = 'firebrick',
-                  nudge_x = 0.1,  
-                  nudge_y = 0.1,  
-                  box.padding = 0.2,  
-                  point.padding = 0.2, 
-                  segment.color = 'grey50') + 
-  labs(x = 'Pixel Cost', y = 'SD Information Loss (eRIDE)') +  
-  theme_bw() 
-
-#-- gam
-
-info_loss_plot <- ggplot(infodf, aes(x = cost, y = SD_loss)) +
-  geom_point(size = 5, shape = 19) + 
-  ggrepel::geom_text_repel(aes(label = rev(scale)),  
-                           color = 'firebrick',
-                           nudge_x = 0.1,  
-                           nudge_y = 0.1, 
-                           box.padding = 0.2, 
-                           point.padding = 0.2,  
-                           segment.color = 'grey50') + 
-  geom_smooth(method = "gam", formula = y ~ s(x, k = 4), color = "gray50", se = FALSE, linetype = "dashed") +  # Add GAM curve with k=4
-  labs(x = 'Pixel Cost', y = 'SD Information Loss (eRIDE)') +  
-  theme_bw() 
-
-ggsave("scale_effect_SD.jpg", plot = info_loss_plot, width = 8, height = 6, dpi = 300)
-ggsave("scale_effect_SD.png", plot = info_loss_plot, width = 8, height = 6, dpi = 300)
-
 
 # Repeat for PAR
 
@@ -169,10 +149,20 @@ getthispar <- which(infodf_PAR[,'Resolution'] == 100)
 
 infodf_PAR$SD_loss <- as.numeric(infodf_PAR[getthispar, 'SD_Value'] ) - infodf_PAR$SD_Value
 
+infodf_PAR$Mean_loss <- as.numeric(infodf_PAR[getthispar, 'Mean_Value'] ) - infodf_PAR$Mean_Value
+
+infodf_PAR$SD_loss_pct <- 100 -  100* (infodf_PAR$SD_Value / as.numeric(infodf_PAR[getthispar, 'SD_Value']))
+
+infodf_PAR$Mean_loss_pct <- 100 -  100* (infodf_PAR$Mean_Value / as.numeric(infodf_PAR[getthispar, 'Mean_Value']))
+
+infodf_PAR$SD_retained_pct <- 100* (infodf_PAR$SD_Value / as.numeric(infodf_PAR[getthispar, 'SD_Value'])  )
+
+infodf_PAR$Mean_retained_pct <-  100* (infodf_PAR$Mean_Value / as.numeric(infodf_PAR[getthispar, 'Mean_Value']))
+
 infodf_PAR
 
+# Export
 write.table(file='resolution_effect_par.txt', infodf_PAR, row.names = FALSE)
-
 
 info_loss_plot_PAR <- ggplot(infodf_PAR, aes(x = cost, y = SD_loss)) +
   geom_point(size = 5, shape = 19) + 
@@ -188,8 +178,6 @@ info_loss_plot_PAR <- ggplot(infodf_PAR, aes(x = cost, y = SD_loss)) +
   theme_bw() 
 
 info_loss_plot_PAR
-
-
 
 ggsave("scale_effect_SD_PAR.jpg", plot = info_loss_plot_PAR, width = 8, height = 6, dpi = 300)
 ggsave("scale_effect_SD_PAR.png", plot = info_loss_plot_PAR, width = 8, height = 6, dpi = 300)
