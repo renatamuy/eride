@@ -1,7 +1,7 @@
 # Automated extraction of values
 # Renata Muylaert
 
-setwd('results')
+#setwd('results')
 data <- read.table('resolution_effect_eride.txt', head=TRUE)
 
 data
@@ -78,6 +78,16 @@ glm_model <- glm(information ~ cost, data = data, family = gaussian)
 
 piecewise_model <- segmented(glm_model, seg.Z = ~ cost, psi = list(cost = mean(data$cost)))
 
+summary(piecewise_model)$coefficients
+
+summary(piecewise_model)
+
+target_value <- summary(piecewise_model)$psi[2]
+
+closest_row <- which.min(abs(data$cost - target_value))
+
+data[closest_row, 'scale' ]
+
 # Exponential model
 #exp_model <- glm(information ~ cost, data = data, family = Gamma(link = "log"))
 
@@ -95,6 +105,8 @@ null_model <- glm(information ~ 1, data = data, family = gaussian)
 # Model selection # exp_model,lognorm_model_slope, lognorm_model_0p5, lognorm_model_0p3,
 
 ICtab(gam_model3, gam_model4, piecewise_model,  glm_model, null_model, weights = TRUE, type="AICc", base=TRUE, nobs = nrow(data))
+
+summary(piecewise_model)
 
 # Model plots 
 
@@ -234,6 +246,13 @@ glm_model <- glm(information ~ cost, data = data, family = gaussian)
 
 piecewise_model <- segmented(glm_model, seg.Z = ~ cost, psi = list(cost = mean(data$cost)))
 
+summary(piecewise_model)
+
+target_value <- summary(piecewise_model)$psi[2]
+
+closest_row <- which.min(abs(data$cost - target_value))
+
+data[closest_row, 'scale' ]
 # Exponential model
 #exp_model <- glm(information ~ cost, data = data, family = Gamma(link = "log"))
 

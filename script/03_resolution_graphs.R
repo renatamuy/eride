@@ -81,7 +81,7 @@ my_plotn <- ggplot(data_df, aes(x = as.factor(Resolution), y = Value)) +
   facet_wrap(~ Metric, scales = "free_y") +
   labs(title = "", x = "Resolution",  y = "Value") +
   theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
   scale_x_discrete(labels = cuslab)
 
 my_plotn
@@ -89,8 +89,8 @@ my_plotn
 # Export
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 
-ggsave("scale_effect_N18.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
-ggsave("scale_effect__N18.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect.jpg", plot = my_plotn, width = 12, height = 6, dpi = 300)
+ggsave("scale_effect.tif", plot = my_plotn, width = 12, height = 6, dpi = 300)
 
 head(data_df)
 
@@ -166,7 +166,7 @@ write.table(file='resolution_effect_par.txt', infodf_PAR, row.names = FALSE)
 
 info_loss_plot_PAR <- ggplot(infodf_PAR, aes(x = cost, y = SD_loss)) +
   geom_point(size = 5, shape = 19) + 
-  ggrepel::geom_text_repel(aes(label = rev(scale)),  
+  ggrepel::geom_text_repel(aes(label = Resolution),  
                            color = 'firebrick',
                            nudge_x = 0.1,  
                            nudge_y = 0.1, 

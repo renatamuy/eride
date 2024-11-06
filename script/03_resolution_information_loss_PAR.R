@@ -1,6 +1,14 @@
 # Automated extracted values for PAR
 # Renata Muylaert
 
+library(MASS)
+library(bbmle)
+library(dplyr)
+if(!requireNamespace("mgcv", quietly = TRUE)) install.packages("mgcv")
+library(mgcv)
+library(segmented)
+
+# Data
 data <- read.table('resolution_effect_par.txt', head=TRUE)
 
 data
@@ -28,17 +36,7 @@ plot(x_values, dlnorm(x_values, meanlog = mean_log, sdlog = sd_log),
 grid()
 
 
-# Model selection
-
-library(MASS)
-library(bbmle)
-library(dplyr)
-if(!requireNamespace("mgcv", quietly = TRUE)) install.packages("mgcv")
-library(mgcv)
-library(segmented)
-
-head(data)
-
+# Model selection - SD for PAR
 # set up df
 
 data <- data.frame(scale=data$Resolution, cost=data$cost, information=data$SD_loss)
@@ -67,13 +65,18 @@ data$information <- abs(data$information)
 #  start = list(mu = 0.5, sigma = 0.5, beta = 0.3)  # Initial value for beta
 #)
 
-
 # GLM model
 glm_model <- glm(information ~ cost, data = data, family = gaussian)
 
 #piecewise_model
 
 piecewise_model <- segmented(glm_model, seg.Z = ~ cost, psi = list(cost = mean(data$cost)))
+
+target_value <- summary(piecewise_model)$psi[2]
+
+closest_row <- which.min(abs(data$cost - target_value))
+
+data[closest_row, 'scale' ]
 
 # Exponential model
 #exp_model <- glm(information ~ cost, data = data, family = Gamma(link = "log"))
@@ -228,6 +231,12 @@ glm_model <- glm(information ~ cost, data = data, family = gaussian)
 #piecewise_model
 
 piecewise_model <- segmented(glm_model, seg.Z = ~ cost, psi = list(cost = mean(data$cost)))
+
+target_value <- summary(piecewise_model)$psi[2]
+
+closest_row <- which.min(abs(data$cost - target_value))
+
+data[closest_row, 'scale' ]
 
 #Warning: Breakpoint estimate(s) outdistanced to allow finite estimates and st.errs
 
