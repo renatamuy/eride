@@ -1,6 +1,8 @@
 # Automated extraction of values
 # Renata Muylaert
 
+require(here)
+
 #setwd('results')
 data <- read.table('resolution_effect_eride.txt', head=TRUE)
 
@@ -83,6 +85,8 @@ summary(piecewise_model)$coefficients
 summary(piecewise_model)
 
 target_value <- summary(piecewise_model)$psi[2]
+
+target_value
 
 closest_row <- which.min(abs(data$cost - target_value))
 
@@ -202,7 +206,7 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
   labs(
-    title = "Model Comparisons - Resolution effect",
+    title = "A",
     x = "Cost",
     y = "Information loss (eRIDE) - SD"
   ) +
@@ -250,9 +254,14 @@ summary(piecewise_model)
 
 target_value <- summary(piecewise_model)$psi[2]
 
+target_value
+
 closest_row <- which.min(abs(data$cost - target_value))
 
 data[closest_row, 'scale' ]
+data
+
+
 # Exponential model
 #exp_model <- glm(information ~ cost, data = data, family = Gamma(link = "log"))
 
@@ -338,7 +347,7 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
   labs(
-    title = "Model Comparisons - Resolution effect",
+    title = "B",
     x = "Cost",
     y = "Information loss (eRIDE) - Mean"
   ) +
@@ -360,3 +369,10 @@ plot_mean
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 ggsave("model_selection_eride_mean.jpg", plot = plot_mean, width = 8, height = 8, dpi = 300) 
 
+
+library(ggpubr)
+
+combined_plot <- ggarrange(plot, plot_mean, ncol = 2, nrow = 1)
+
+ggsave("Figure_01_AB.jpg", combined_plot, width = 11, height = 6, dpi = 300)
+#--------------------------------

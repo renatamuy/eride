@@ -7,8 +7,11 @@ library(dplyr)
 if(!requireNamespace("mgcv", quietly = TRUE)) install.packages("mgcv")
 library(mgcv)
 library(segmented)
-
+library(here)
 # Data
+
+setwd(here())
+setwd('results')
 data <- read.table('resolution_effect_par.txt', head=TRUE)
 
 data
@@ -74,10 +77,19 @@ piecewise_model <- segmented(glm_model, seg.Z = ~ cost, psi = list(cost = mean(d
 
 target_value <- summary(piecewise_model)$psi[2]
 
+target_value
+
+data$cost
+
+data
+
+data$cost - target_value
+
+
 closest_row <- which.min(abs(data$cost - target_value))
 
 data[closest_row, 'scale' ]
-
+data[closest_row,]
 # Exponential model
 #exp_model <- glm(information ~ cost, data = data, family = Gamma(link = "log"))
 
@@ -167,6 +179,8 @@ predicted_data$gam_upr4 <- gam_predictions$fit + 1.96 * gam_predictions$se.fit
 
 library(ggplot2)
 
+data
+
 # Create the plot with larger font sizes
 plot <- ggplot(data, aes(x = cost, y = information)) +
   geom_point(color = "black", size = 4, alpha = 0.6) +  # Observed data
@@ -189,13 +203,13 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
   labs(
-    title = "Model Comparisons - Resolution effect",
+    title = "C",
     x = "Cost",
     y = "Information loss (PAR) - SD"
   ) +
   #scale_y_log10(limits = c(0.1, 30))+
   geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
-  coord_cartesian(ylim = c(0, 13), xlim = c(0, 2.9e+7)) +  # Adjust y-axis limits
+  coord_cartesian(xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
     plot.title = element_text(size = 18, face = "bold"),
@@ -203,10 +217,10 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
     axis.text = element_text(size = 14),
     legend.position = "top",
     legend.title = element_text(size = 14),
-    legend.text = element_text(size = 12)
-  ) 
+    legend.text = element_text(size = 12))
 
 plot
+
 
 setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 ggsave("model_selection_par_SD.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
@@ -333,12 +347,13 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
   labs(
-    title = "Model Comparisons - Resolution effect",
+    title = "D",
     x = "Cost",
     y = "Information loss (PAR) - Mean"
   ) +
   #scale_y_log10(limits = c(0.1, 30))+
   geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +
   #coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
@@ -352,5 +367,17 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
 
 plot_mean
 
-setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
+# Export figs 
+
 ggsave("model_selection_PAR_Mean.jpg", plot = plot_mean, width = 8, height = 8, dpi = 300) 
+
+ggsave("model_selection_PAR_Mean.jpg", plot = plot_mean, width = 8, height = 8, dpi = 300) 
+
+
+library(ggpubr)
+
+combined_plot <- ggarrange(plot, plot_mean, ncol = 2, nrow = 1)
+
+ggsave("Figure_01_CD.jpg", combined_plot, width = 11, height = 6, dpi = 300)
+
+#------------------
