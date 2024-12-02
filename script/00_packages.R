@@ -47,8 +47,6 @@ pkg_list_cran <- c("devtools",
                    "wesanderson",
                    "hrbrthemes")
 
-
-
 # require else install all packages
 lapply(X = pkg_list_cran, 
        FUN = function(x) if(!require(x, character.only = TRUE)) install.packages(x, dep = TRUE, quiet = TRUE))
