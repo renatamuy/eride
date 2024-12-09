@@ -4,9 +4,9 @@ north:      -707835.4696
 south:      -713935.4696
 east:       11868696.3188
 west:       11862296.3188
-cols:       64
-rows:       61
-e-w resol:  100
-n-s resol:  100
-format:     0
+cols:       213
+rows:       203
+e-w resol:  30.04694836
+n-s resol:  30.04926108
+format:     1
 compressed: 5
