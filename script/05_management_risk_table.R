@@ -16,7 +16,7 @@ library(ggspatial)
 library(exactextractr)
 library(biscale)
 library(cowplot)
-
+library(here)
 # Get management rast
 
 lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_with-colorbar.tif'
@@ -130,10 +130,11 @@ landcov_fracs %>%
 
 
 ## Open PAR file
-
-#setwd('results')
+setwd(here())
+setwd('results')
 regions_updated
-#st_write(regions_updated, "management_cover.shp", append=FALSE)
+
+st_write(regions_updated, "management_cover.shp", append=FALSE)
 
 regions_PAR <- read_sf('regions_PAR.shp')
 
@@ -176,8 +177,6 @@ colnames(landcov_longl)
 landcov_longl$Type_Specific
 
 # Create the scatterplot
-
-
 fig_land_par <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
@@ -194,13 +193,12 @@ fig_land_par <- landcov_longl %>%
 
 fig_land_par
 
-ggsave("fig_land_par_col.png", fig_land_par, width = 8, height =4, dpi = 300)
-ggsave("fig_land_par_col.jpg", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("Fig_S09A.png", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("Fig_S09A.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
 
 
 #------
-
 
 par_joy <- landcov_longl %>%
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>%  # Remove NA values
@@ -215,8 +213,9 @@ par_joy <- landcov_longl %>%
 
 par_joy
 
-#export
-ggsave("par_man_joy.jpg", plot = par_joy, width = 10, height = 4, dpi = 300)
+#export 
+
+ggsave("Fig_04A.jpg", plot = par_joy, width = 10, height = 4, dpi = 300)
 
 #--
 # export tibble as df
@@ -236,9 +235,9 @@ map <- ggplot() +
     subtitle = "A."
   ) +
   #geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
-  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size = 2, color = "black", 
-                                 show.legend = FALSE) +
-  bi_theme( axis.title.x = element_blank(),  
+  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size =2.5, color = "black", 
+                                 show.legend = FALSE, alpha=0.7) +
+    bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
             axis.text.y = element_blank()          )
@@ -267,8 +266,8 @@ mapb <- ggplot() +
     subtitle = "B."
   ) +
   #geom_sf_text(data = data, aes(label = name), size = 3, color = "black") + 
-  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size = 2, color = "black", 
-                                 show.legend = FALSE) +
+  ggsflabel::geom_sf_label_repel(data = data, aes(label = name), size = 2.5, color = "black", 
+                                 show.legend = FALSE,  alpha=0.7) +
   bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
@@ -289,10 +288,11 @@ bivfigs_long <- cowplot::ggdraw() +
   draw_plot(mapb, 0.2, 0.1, 0.8, 0.45)       # Mapb on the right, same size as above
 
 # export 
-
+setwd('Figures')
 bivfigs_long
 
-ggsave(filename = "fig_risk_management.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "Fig_S6.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "Fig_S6.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
 
 #--------------------------------------

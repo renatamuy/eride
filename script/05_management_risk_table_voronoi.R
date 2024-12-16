@@ -85,17 +85,17 @@ ggplot(data = regions_updated) +
 
 
 # bar plot
-
 landcov_fracs <- landcov_fracs %>%
   mutate(name = factor(stringr::str_extract(voronoi_id, "^[^_]+")) )
 
+# Figure S8
   
 landcov_fracs %>%
   filter(!is.na(value)) %>%
   ggplot(aes(x = name, y = freq, fill = Type_Specific)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
-  facet_wrap(~Type_Broad  ) +
+  #facet_wrap(~Type_Broad  ) +
   labs(title = "",
        x = "Region",
        y = "Proportion",
@@ -106,8 +106,9 @@ landcov_fracs %>%
 
 
 # Open PAR file
+setwd(here())
 setwd('results')
-#st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
+st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
 
 #-----------------
 
@@ -120,9 +121,7 @@ regions_updated_PAR <- regions_updated %>%
   left_join(data.frame(regions_PAR[c('voronoi_id', 'PAR')]))
 
 
-
 # after creating regions_updated_PAR
-
 table_management_districts <- landcov_fracs %>%
   filter(!is.na(value)) %>%
   group_by(name) %>%
@@ -153,29 +152,50 @@ landcov_longl$Type_Specific
 
 # Create the scatterplot
 
-fig_land_par <- landcov_longl %>% 
+fig_land_par_gam <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
   geom_point(size=3) +
   #facet_wrap(~Type_Specific)+
   geom_smooth(method= 'gam', aes(group = Type_Specific, fill = Type_Specific), 
-              formula = y ~ s(x, bs = "cs", fx = TRUE, k = 3), se = TRUE, size=1.6, show.legend = FALSE) +
+              formula = y ~ s(x, bs = "cs", fx = TRUE, k = 3),
+              se = TRUE, size=1.6, show.legend = FALSE) +
   labs(x = "% Land cover", y = "PAR", color = "Management type") +
   scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
   scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
   scale_y_log10() + 
   theme_minimal() +  theme(legend.position = "right") 
 
-fig_land_par
-
+fig_land_par_gam
 
 # Save
 
 ggsave("fig_land_par_voronoi_gam_col_log.png", fig_land_par, width = 8, height =4, dpi = 300)
-ggsave("fig_land_par_voronoi_gam_col)_log.jpg", fig_land_par, width = 8, height =4, dpi = 300)
+ggsave("fig_land_par_voronoi_gam_col_log.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
-# joyplot
 
+
+fig_land_par_glm <- landcov_longl %>% 
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
+  ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
+  geom_point(size=3) +
+  #facet_wrap(~Type_Specific)+
+  geom_smooth(method= 'glm', aes(group = Type_Specific, fill = Type_Specific), 
+              se = TRUE, size=1.6, show.legend = FALSE) +
+  labs(x = "% Land cover", y = "PAR", color = "Management type") +
+  scale_color_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)]) +
+  scale_y_log10() + 
+  theme_minimal() +  theme(legend.position = "right") 
+
+fig_land_par_glm
+
+# Save
+ggsave("Fig_S09B.png", fig_land_par_glm, width = 8, height =4, dpi = 300)
+ggsave("Fig_S09B.jpg", fig_land_par_glm, width = 8, height =4, dpi = 300)
+
+
+# joyplot -----------------------------------
 library(ggridges)
 
 summary(landcov_longl$PAR)
@@ -220,10 +240,16 @@ par_joy <- landcov_longl %>%
 
 par_joy
 
-#export
-ggsave("par_man_joy_vor.jpg", plot = par_joy, width = 10, height = 4, dpi = 300)
+#export Fig 04
+setwd('Figures')
+ggsave("Fig_04.jpg", plot = par_joy, width = 10, height = 3, dpi = 300)
+ggsave("Fig_04.tif", plot = par_joy, width = 10, height = 3, dpi = 300)
 
-# A 
+
+# Checking
+unique(regions_updated_PAR$name_x)
+
+# Supplements A 
 data <- bi_class(regions_updated_PAR, x = PAR, y = manag_11, style = "quantile", dim = 3)
 
 data
@@ -236,8 +262,9 @@ map <- ggplot() +
     subtitle = "A."
   ) +
   #geom_sf_text(data = data, aes(label = voronoi_id), size = 1, color = "black") + 
-  ggsflabel::geom_sf_label_repel(data = data, aes(label = voronoi_id), size = 2, color = "black", 
-                     show.legend = FALSE) +
+  ggsflabel::geom_sf_label_repel(data = data, 
+                                 aes(label = voronoi_id), size = 1, color = "black", 
+                     show.legend = FALSE, max.overlaps=33, alpha = 0.7) +
   bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
@@ -267,8 +294,9 @@ mapb <- ggplot() +
     subtitle = "B."
   ) +
   #geom_sf_text(data = data, aes(label = voronoi_id), size = 1, color = "black") + 
-  ggsflabel::geom_sf_label_repel(data = data, aes(label = voronoi_id), size = 2, color = "black", 
-                                 show.legend = FALSE) +
+  ggsflabel::geom_sf_label_repel(data = data, aes(label = voronoi_id), 
+                                 size = 1, color = "black", 
+                                 show.legend = FALSE, max.overlaps=33,  alpha = 0.7) +
   bi_theme( axis.title.x = element_blank(),  
             axis.title.y = element_blank(),  
             axis.text.x = element_blank(),    
@@ -292,8 +320,8 @@ bivfigs_long <- cowplot::ggdraw() +
 
 bivfigs_long
 
-ggsave(filename = "fig_risk_management_voronoi.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "Fig_S5.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
-ggsave(filename = "fig_risk_management_voronoi.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "Fig_S5.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 
 #--------------------------------------

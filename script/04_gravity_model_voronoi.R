@@ -1,7 +1,6 @@
 # java zonal - gravity model
 
 gc()
-
 require(terra)
 require(rgrass)
 require(rnaturalearth)
@@ -27,12 +26,12 @@ regions <- read_sf(vector_file)
 # be aware they are multi-polygon regions
 centroids <- st_centroid(regions) # add pop raster 
 
+unique(centroids$name_x)
 
 # get raster of population at risk at the desired resolution
 raster_data <- terra::rast("E://PAR_100.tif")
 
 # zonal - average
-
 regions$PAR <- terra::extract(raster_data, regions, fun = mean, na.rm = TRUE)
 
 regionstoxp <- regions
@@ -46,6 +45,8 @@ st_write(regionstoxp, "regions_voronoi_forced_PAR.shp", append=FALSE)
 
 # pairwise distances between centroids of regions
 n_regions <- nrow(regions)
+
+n_regions
 
 # create empty matrix
 distance_matrix <- matrix(NA, n_regions, n_regions)
@@ -129,15 +130,15 @@ total_risk_contribution <- risk_contribution_long %>%
 risk_contribution_long$Region <- factor(risk_contribution_long$Name_A,
                                         levels = total_risk_contribution$Name_A)
 
-
 # Export
 setwd('C://Users//rdelaram//Documents//GitHub//eride/results')
 
 write.csv(gravity_data, file = 'gravity_model_voronoi_results.csv')
 
-
 # Set up 69 colors
-kpal <- get_pal("Kereru")
+
+
+kpal <- c(rev(get_pal("Kereru")), 'cadetblue')
 
 # Create a palette with 69 colors by interpolation
 palheaps <- colorRampPalette(kpal)(n_regions)
@@ -283,10 +284,10 @@ grav_network <- ggplot() +
 
 grav_network
 
-#
+# export
 ggsave(filename= 'fig_grav_network_100m_voronoi.png', dpi=400, width=18, height = 10, units = 'cm')
 
-# Getting just the top 20 links
+# Getting just the top links
 
 top_edges_sf <- edges_sf %>%
   filter(flow > 15)     
@@ -297,7 +298,11 @@ unique(top_edges_sf$from)
 
 top_nodes_sf <- nodes_df[nodes_df$voronoi_id %in% top_edges_sf$from,]
 
+nrow(top_nodes_sf) #33
+
+
 # Fig top flows
+require(ggrepel)
 grav_network_top <- ggplot() +
   geom_polygon(data = indonesia_map, aes(x = long, y = lat, group = group), fill = "grey20") +
   coord_fixed(1.3) + 
@@ -305,13 +310,19 @@ grav_network_top <- ggplot() +
   ylim(-9, -5) +     
   theme_minimal() +  
   geom_curve(data = top_edges_sf,  
-             aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*(flow) ), 
+             aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*(flow)), 
              curvature = 0.3, color = col.2, lineend = "round", alpha = 0.7, show.legend = FALSE) +
-  geom_text(data = top_nodes_sf, aes(x = X, y = Y, label = voronoi_id), color = 'white', size = 1.5, hjust = -0.2, vjust = -0.2) +
+  geom_label_repel(data = top_nodes_sf, aes(x = X, y = Y, label = voronoi_id), 
+                   fill = "snow1",    # Background color for the tag
+                   color = "gray40",   # Text color
+                   size = 2, 
+                   box.padding = 0.5, 
+                   point.padding = 0.3, 
+                   max.overlaps = 33) +
   geom_point(data = top_nodes_sf, aes(x = X, y = Y), size = 2, color = col.1, alpha = 0.9) +
   scale_size_continuous(range = c(0.1, 3)) +  
   theme_void() +
-  labs(title = "Pandemic Risk") +
+  labs(title = "") +
   theme(plot.background = element_rect(fill = "azure2", color = NA))
 
 grav_network_top

@@ -22,11 +22,11 @@ vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_distr
 #epsg 3857
 
 regions <- read_sf(vector_file)
+keep <- c("Banten" ,      "Jakarta",      "West Java" ,   "Central Java", "Yogyakarta" , "East Java" ,   "Bali"  )     
 regions <- regions[regions$name_en %in% keep, ]
 
 # be aware they are multi-polygon regions
 centroids <- st_centroid(regions) # add pop raster 
-
 
 # get raster of population at risk at the desired resolution
 raster_data <- terra::rast("E://PAR_100.tif")
@@ -56,9 +56,10 @@ regionstoxp$PAR <-  regions$PAR[[2]]
 
 colnames(regionstoxp)
 
+setwd('../results')
+
 # Export to results (to merge with management)
 st_write(regionstoxp, "regions_PAR.shp", append=FALSE)
-
 
 # pairwise distances between centroids of regions
 n_regions <- nrow(regions)
@@ -153,7 +154,7 @@ write.csv(gravity_data, file = 'gravity_model_results.csv')
 
 # Barchart with contributions
 
-setwd('results')
+mypal <- c(rev(get_pal("Kereru")), 'cadetblue')
 
 fig_grav <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow, fill = Name_B)) +
   geom_bar(stat = "identity", position = "stack") +
@@ -166,7 +167,7 @@ fig_grav <- ggplot(risk_contribution_long, aes(x = Name_A, y = Risk_Flow, fill =
     axis.title.x = element_text(size = 14),                       
     axis.title.y = element_text(size = 14),                        
     plot.title = element_text(size = 16, hjust = 0.5) ) +
-  scale_fill_manual(values = rev(get_pal("Kereru"))) 
+  scale_fill_manual(values = mypal) 
 
 fig_grav
 
@@ -267,11 +268,11 @@ edges_sf <- edges_tbl %>%
 
 
 # Edges
-
 st_write(edges_sf, "edges_sf.shp", delete_dsn = TRUE)
 
 
-# Spatial network - gravity modelhttp://127.0.0.1:17399/graphics/plot_zoom_png?width=2048&height=1090
+# Spatial network - gravity model http://127.0.0.1:17399/graphics/plot_zoom_png?width=2048&height=1090
+require(ggrepel)
 
 grav_network <- ggplot() +
   geom_polygon(data = indonesia_map, aes(x = long, y = lat, group = group), fill = "grey20") +
@@ -282,7 +283,14 @@ grav_network <- ggplot() +
     geom_curve(data = edges_sf, 
              aes(x = long.from, y = lat.from, xend = long.to, yend = lat.to, linewidth = 0.3*(flow) ), 
              curvature = 0.3, color = col.2, lineend = "round", alpha = 0.7, show.legend = FALSE) +
-  geom_text(data = nodes_df, aes(x = X, y = Y, label = name), color = 'white', hjust = -0.2, vjust = -0.2) +
+  #geom_text(data = nodes_df, aes(x = X, y = Y, label = name), color = 'white', hjust = -0.2, vjust = -0.2) +
+  geom_label_repel(data = nodes_df, aes(x = X, y = Y, label = name), 
+                   fill = "snow1",    # Background color for the tag
+                   color = "gray40",   # Text color
+                   size = 4, 
+                   box.padding = 0.3, 
+                   point.padding = 0.1, 
+                   max.overlaps = 33) +
   geom_point(data = nodes_df, aes(x = X, y = Y), size = 4, color = col.1, alpha = 0.9) +
   scale_size_continuous(range = c(0.1, 3)) +  
   theme_void() +
@@ -293,10 +301,10 @@ grav_network <- ggplot() +
                   # style = "ticks", height = unit(0.3, "cm"), 
                   # plot_unit = c("km"), pad_x = unit(0.2, "cm")) #+  coord_sf(crs = 4326)
 
+#---------------------------------------------------------------------------------------
 grav_network
 
-ggsave(filename= 'fig_grav_network_100m.tif', dpi=400, width=18, height = 10, units = 'cm')
-
-ggsave(filename= 'fig_grav_network_100m.png', dpi=400, width=18, height = 10, units = 'cm')
+ggsave(filename= 'fig_3A.tif', dpi=400, width=18, height = 10, units = 'cm')
+ggsave(filename= 'fig_3A.png', dpi=400, width=18, height = 10, units = 'cm')
 
 #---------------------------------------------------------------------------------------------------------

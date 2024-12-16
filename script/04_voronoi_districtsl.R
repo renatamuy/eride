@@ -60,17 +60,17 @@ percentile_value <- round(percentile_value)
 #* = 1
 #
 
-#rules_file <- "my_reclass_rule.txt"
+rules_file <- "my_reclass_rule.txt"
 #writeLines(reclass_rules, con = rules_file)
 
-rules_file_path <- file.path(getwd(), "my_reclass_rule.txt")
+#rules_file_path <- file.path(getwd(), "my_reclass_rule.txt")
 
 # execGRASS("g.remove", type="raster", name="above_95th_percentile", flags="f")
 
 # (omg this was stressful!)
-execGRASS("r.reclass", input="pop", output="above_95th_percentile", rules=rules_file)
+execGRASS("r.reclass", input="pop", output="above_95th_percentile", rules=rules_file, flags="overwrite")
 
-rgrass::execGRASS("g.list", type = "raster")
+rgrass::execGRASS("g.list", type = "raster") # 127
 
 system("r.report map=above_95th_percentile units=c,p")
 
@@ -111,7 +111,6 @@ execGRASS("v.out.ogr", input="high_pop_points", output="high_pop_points.shp", fo
 # -----------
 # Voronoi building
 
-
 # Run Voronoi tessellation 
 execGRASS("v.voronoi", input="high_pop_points", output="voronoi_polygons", flags = c("overwrite"))
 
@@ -119,13 +118,11 @@ execGRASS("v.voronoi", input="high_pop_points", output="voronoi_polygons", flags
 #execGRASS("v.to.rast", input="voronoi_polygons", output="voronoi_raster", use="cat")
 
 # Export Voronoi polygons to a shapefile
-execGRASS("v.out.ogr", input="voronoi_polygons", output="voronoi_polygons.shp", format="ESRI_Shapefile")
+execGRASS("v.out.ogr", input="voronoi_polygons", output="voronoi_polygons.shp", format="ESRI_Shapefile", flags = c("overwrite"))
 
 voronoi_polygons <- st_read("voronoi_polygons.shp")
 
-
 #--------------------------------------------------------------------------------------------
-
 # Add raster_above_95th to this plot
 
 ggplot() +
@@ -147,6 +144,7 @@ plot(raster_above_95th, main = "Above 95th Percentile Masked Raster", col = c("l
 vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/data//subset_districts.shp" 
 
 keep <- c("Banten",
+          "Jakarta",
           "West Java", 
           "Central Java",   
           "Yogyakarta"  ,
@@ -192,12 +190,10 @@ plot(masked_voronoik)
 
 masked_voronoik$voronoi_id
 
-# Export 
+# Export -----------------------------------------------
 
-#st_write(intersection, "high_pop_voronoi_java.shp", delete_dsn = TRUE)
-#st_write(masked_voronoi, "high_pop_voronoi_java_mask_id.shp", delete_dsn = TRUE)
-
-
+st_write(intersection, "high_pop_voronoi_java.shp", delete_dsn = TRUE)
+st_write(masked_voronoi, "high_pop_voronoi_java_mask_id.shp", delete_dsn = TRUE)
 
 
 # We want 1 cat - 1 region - A voronoi should be forced to one district only based on area
@@ -287,18 +283,17 @@ vorplot_forcedy <- ggplot() +
   theme(plot.title = element_text(hjust = 0.5)) + 
   scale_fill_viridis_d(name = "Districts")
 
+#-------------------------------------------------------------------------------------------------------------
 # Check this  - Why is Bali_96 not in Timur????
 vorplot_forced # weird Bali
 vorplot_forcedy #ALSO weird Bali
 table(masked_voronoi2$cat)
 table(masked_voronoi2$voronoi_id)
 table(masked_voronoi2$name.x)
-
 table(masked_voronoi2y$name.y)
 
-vorplot
 
-# Plot without forcing regions
+# Plot without forcing regions - Sig S4
 vorplot <- ggplot() +
   geom_sf(data = regions, aes(fill = name), color = "black", alpha = 0.5) +  
   geom_sf(data = masked_voronoi, fill = "white", color = "gray30", alpha = 0.4) + 
@@ -318,16 +313,17 @@ rowSums(table(intersection$name, intersection$cat))
 
 voronoi_polygons$cat
 
-# Export shapefile 
+# Export shapefiles --------------------------
+require(here)
 
+setwd(here())
 setwd('results')
 
 st_write(masked_voronoi2, "districts_high_pop_voronoi_cat_forced.shp", delete_dsn = TRUE)
 
 st_write(masked_voronoi2y, "districts_high_pop_voronoi_cat_forcedy.shp", delete_dsn = TRUE)
 
-
-data.frame(masked_voronoi2$name.y, masked_voronoi2$voronoi_id)
+data.frame(masked_voronoi2$name.x, masked_voronoi2$voronoi_id)
 
 # Export fig 
 
