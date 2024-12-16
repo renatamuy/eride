@@ -14,6 +14,7 @@ library(ggspatial)
 library(exactextractr)
 library(biscale)
 library(cowplot)
+library(here)
 
 # Get management rast
 
@@ -174,7 +175,6 @@ ggsave("fig_land_par_voronoi_gam_col_log.png", fig_land_par, width = 8, height =
 ggsave("fig_land_par_voronoi_gam_col_log.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
 
-
 fig_land_par_glm <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
@@ -200,7 +200,7 @@ library(ggridges)
 
 summary(landcov_longl$PAR)
 
-#
+
 mean_par <- mean(landcov_longl$PAR, na.rm = TRUE)
 
 # Create new column "PAR_above_below"
