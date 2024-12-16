@@ -199,7 +199,7 @@ ggsave("Fig_S09A.jpg", fig_land_par, width = 8, height =4, dpi = 300)
 
 
 #------
-
+require(ggridges)
 par_joy <- landcov_longl %>%
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>%  # Remove NA values
   ggplot(aes(x = manag_value, y = Type_Specific, fill = Type_Specific)) + 
@@ -293,6 +293,4 @@ bivfigs_long
 
 ggsave(filename = "Fig_S6.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 ggsave(filename = "Fig_S6.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
-
-
 #--------------------------------------
