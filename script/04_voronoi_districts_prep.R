@@ -51,7 +51,7 @@ percentile_value <- as.numeric(split_values[3])
 percentile_value <- round(percentile_value) 
 
 # Rules
-# Zero is not necessary bro!
+# Zero is not necessary 
 #0 thru 5 = 0
 #* = 1
 #
@@ -67,10 +67,10 @@ rules_file <- "my_reclass_rule.txt"
 
 # execGRASS("g.remove", type="raster", name="above_95th_percentile", flags="f")
 
-# (omg this was stressful!)
+# get it running
 execGRASS("r.reclass", input="pop", output="above_95th_percentile", rules=rules_file, flags="overwrite")
 
-rgrass::execGRASS("g.list", type = "raster") # 127
+rgrass::execGRASS("g.list", type = "raster") 
 
 system("r.report map=above_95th_percentile units=c,p")
 
