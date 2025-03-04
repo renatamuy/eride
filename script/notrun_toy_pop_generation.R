@@ -1,3 +1,6 @@
+# NOT RUN
+# Toy pop generation 
+
 # ------------------------------------------------------------------------------------------------------------
 # R 4.4.1 Race for Your Life        
 # eRIDE - March 2025
@@ -12,7 +15,7 @@ setwd('script')
 source('src/eride_run.R')
 
 setwd(here())
-setwd('toy_data')
+setwd('toy_data_z0p28')
 
 # Find grass
 #Linux
@@ -38,18 +41,6 @@ rgrass::execGRASS("r.in.gdal",
                   input = im,
                   output = "rast",
                   flags = c("overwrite"))
-
-# Importing pop
-
-impop="pop.tif"
-
-# Creating rast 
-rgrass::execGRASS("r.in.gdal",
-                  input = impop,
-                  output = "pop",
-                  flags = c("overwrite"))
-
-#-----------------------------------
 
 imr <- rast('toy.tif')
 
@@ -81,18 +72,29 @@ rgrass::execGRASS("g.region",
                   raster="blank_raster", 
                   res = wres) # degrading working resolution to 100 m
 
+# Download pop raster here and load locally: https://hub.worldpop.org/geodata/summary?id=6376
+pop <- 'G:/indonesia/idn_ppp_2020.tif' 
+
+rgrass::execGRASS("r.import",
+                  input = pop,
+                  output = "pop",
+                  flags = c("overwrite"))
+
 # List rasters
 rgrass::execGRASS("g.list", type = "raster")
 
-# ERIDE ---------------
+# Export pop to make the repo light
+
+execGRASS("r.out.gdal", input = "pop", output = 'pop.tif', type = "Float32",
+          flags = c("overwrite", "f"), createopt = "TFW=YES,COMPRESS=DEFLATE,BIGTIFF=YES")
+
 # The larger the radius, the slower the processing time
 # default function radius is 10, we keep it as 10 as it approximates to 20 x 20 window size from Wilkinson et al (2018)
 # default nproc=7, default memory = 1000
 # Run eride and PAR with specified parameters (all default but z, in this case)
+eride_run("rast", "pop", z = 0.28)
 
-eride_run("rast", "pop", z = 0.20)
-
-# Get results
+# Get results for toy region
 
 results <- rast(imr)
 results$fragments=rast("fragments.tif")
@@ -103,7 +105,14 @@ results$weighted_boundaries <- rast("wb.tif")
 results$eRIDE<- rast("eRIDE.tif")
 results$PAR <- rast('PAR.tif')
 
-png(filename='results_toy.jpg', res=300, units = 'cm', width= 18, height = 10)
+par(mfrow=c(2,2))
+plot(results$biodiversity, main='biodiversity')
+plot(results$edges, main='edges')
+plot(results$eRIDE, main=paste('eRIDE with radius =', radius, 'px'))
+plot(results$PAR, main= paste('Population at Risk per', wres,'m2') )
+
+png(filename='results_toy.png', res=300, units = 'cm', width= 18, height = 10)
 plot(results)
 dev.off()
+
 #--------------------------------------------------------------------------------------------

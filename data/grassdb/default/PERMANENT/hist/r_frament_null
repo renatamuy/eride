@@ -1,9 +1,0 @@
-Wed Sep 25 14:42:36 2024
-r_frament_null
-PERMANENT
-rdelaram
-raster
-
-
-gerado por RMAPCA~1
-if(r == 1, 1, null())

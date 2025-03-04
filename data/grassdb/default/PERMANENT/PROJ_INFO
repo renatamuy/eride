@@ -1,9 +1,0 @@
-name: unknown
-datum: wgs84
-ellps: wgs84
-proj: merc
-lon_0: 0
-k: 1
-x_0: 0
-y_0: 0
-no_defs: defined

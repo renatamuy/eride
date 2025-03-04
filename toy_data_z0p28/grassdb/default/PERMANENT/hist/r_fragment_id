@@ -1,0 +1,10 @@
+Wed Mar 05 11:00:32 2025
+r_fragment_id
+PERMANENT
+rdelaram
+raster
+r_fragment_null
+
+gerado por RCLUMP~1
+RCLUMP~1 --overwrite --quiet -d input="r_fragment_null" output="r_fr\
+agment_id" threshold=0 minsize=1

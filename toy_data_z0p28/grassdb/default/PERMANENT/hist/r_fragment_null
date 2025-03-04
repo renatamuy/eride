@@ -1,0 +1,9 @@
+Wed Mar 05 11:00:31 2025
+r_fragment_null
+PERMANENT
+rdelaram
+raster
+
+
+gerado por RMAPCA~1
+if(r == 1, 1, null())
