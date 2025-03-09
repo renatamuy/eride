@@ -1,10 +1,8 @@
 #--------------------------------------------------
 # R 4.4.1 Race for Your Life        
-# eRIDE scales - October 2024
+# eRIDE scales - March 2025
 
 # Packages ---------------------------------------------------------------------------------------------------
-
-# Base raster 
 
 source("C:/Users/rdelaram/Documents/GitHub/eride/script/src/eride_run_scales.R")
 require(terra)
