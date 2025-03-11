@@ -1,5 +1,5 @@
 # Landscape characterization
-# GRASS 8.2.0 (2022)
+# GRASS 8.4.1 (2025)
 # Packages ---------------------------------------------------------------------------------------------------
 
 require(terra)
@@ -15,7 +15,7 @@ setwd('E:/')
 #grassDir='/opt/nesi/CS400_centos7_bdw/GRASS/8.2.1-gimkl-2022a/grass82'
 
 # Find grass on Windows
-grassDir='C:/Program Files/GRASS GIS 8.2'
+grassDir='C:/Program Files/GRASS GIS 8.4'
 
 # Set the desired environment --------------------------------------------------------------------------------
 # Land use raster
@@ -109,13 +109,13 @@ rgrass::execGRASS(cmd = "r.stats",
                   flags = c("a", "c", "n", "overwrite"),
                   separator = ",",
                   input = "r_fragment_id",
-                  output = "java_fid_area_30m.csv")
+                  output = "java_fid_area_30m_grass8p4.csv")
 
 rgrass::execGRASS("g.list", type = "raster")
 
 # Read table of forest fragment and area
 
-area_stats <- read.csv("java_fid_area_30m.csv", header= FALSE)
+area_stats <- read.csv("java_fid_area_30m_grass8p4.csv", header= FALSE)
 
 head(area_stats)
 nrow(area_stats)
@@ -140,7 +140,7 @@ summary(area_stats$Area_ha)
 347815.3 / 100
 
 # Not running in GRASS 8.2.0 (2022)
-
+# Not running in GRASS 8.4 (2025)
 # Get area in square units as raster
 
 rgrass::execGRASS("g.version")
@@ -151,8 +151,6 @@ rgrass::execGRASS(cmd = "r.area",
                   output = "r_fragment_area")
 
 # export
-
-
 
 rgrass::execGRASS(cmd = "r.out.gdal",
                   flags = c("overwrite"),
@@ -171,6 +169,5 @@ rgrass::execGRASS(cmd = "r.out.gdal",
                   input = "r_fragment_area",
                   output = "r_fragment_area_ha_30m.tif",
                   format = "GTiff")
-
 
 #------------------------------------------
