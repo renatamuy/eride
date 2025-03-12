@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------
 # Panels containing eRIDE results using z value for SAR at 0.2 and 0.3
 #
-#
+# R. Muylaert 2025
 #-----------------------------------------------------------------------------------
 
 gc()
@@ -48,9 +48,6 @@ indonesia_map <- world_map %>%
 # Panel A Estimated relative diversity from SAR 
 
 
-
-#
-
 biop <- ggplot() +
   geom_spatraster(data = bio) +
   scale_fill_whitebox_c(palette = "soft" )+
@@ -69,11 +66,16 @@ eridep <- ggplot() +
 
 eridep
 
+
+summary(raster::values(par))
+
+# max 949.4
+
 parp <-  ggplot() +
   geom_spatraster(data = par) +
   scale_fill_gradientn(
     colours = hcl.colors(10, palette = "inferno"),
-    trans = "log",
+    trans = "log10",
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)),
     na.value = "transparent" 
@@ -130,7 +132,7 @@ parpz <- ggplot() +
   geom_spatraster(data = parz) +
   scale_fill_gradientn(
     colours = hcl.colors(10, palette = "inferno"),
-    trans = "log",
+    trans = "log10",
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)),
     na.value = "transparent"  # Makes NA values transparent instead of gray
@@ -240,7 +242,7 @@ data500m
 
 require(xlsx)
 
-write.xlsx(data500m, file = 'Table_z_data500m.xlsx', row.names = FALSE)
+#write.xlsx(data500m, file = 'Table_z_data500m.xlsx', row.names = FALSE)
 
 ggsave(comparison_plot, filename= 'Fig_z_comparison_500m.jpg', dpi=400, width=10, height = 9, units = 'cm')
 
