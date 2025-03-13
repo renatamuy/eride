@@ -20,6 +20,10 @@ library(ggspatial)
 library(exactextractr)
 library(biscale)
 library(cowplot)
+require(here)
+require(oneimpact)
+library (rasterVis)
+require(RColorBrewer)
 
 # Get management rast
 
@@ -27,7 +31,7 @@ lesiv <- 'E:/manrast/manrast.tif'
 
 manrast <- rast(lesiv)
 
-par <- 'E:/PAR_100.tif'
+par <- 'E:/eride_scales_z0p20/PAR_100.tif'
 
 parr <- rast(par)
 
@@ -72,54 +76,56 @@ fig_land_par <- merged_datal %>%
   geom_violin(aes(fill = as.factor(Type_Specific)), scale = "width", trim = FALSE) +
   scale_fill_manual(values = get_pal("Pohutukawa")[c(4,3,2)])+
   labs(title = "", x = "Forest management",  y = "PAR") +
-  scale_y_log10() + 
+  #scale_y_log10() + 
   theme_minimal() +
   theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) 
 
 fig_land_par
 
-# Save
-ggsave("fig_land_par_pixel_log.png", fig_land_par, width = 4, height =4, dpi = 300)
-ggsave("fig_land_par_pixel_log.jpg", fig_land_par, width = 4, height =4, dpi = 300)
+# Export 
 
-# ---------------- Cumulative risk
+setwd(here())
+setwd('results/Figures')
 
-require(oneimpact)
-library (rasterVis)
-require(RColorBrewer)
+ggsave("Fig_S10.png", fig_land_par, width = 4, height =4, dpi = 300)
+ggsave("Fig_S10.tif", fig_land_par, width = 4, height =4, dpi = 300)
 
-# Java island extent is: 1,064 km
+# ---------------- Cumulative risk ---
+# Java island extent is: 1,064 km long per 140 kilometers wide
 
-1000 * 10 # 10 km
-1000 * 100 # 100 km
-1000 * 1000 # 100 km
+10000 # 10 km
+100000 # 100 km
+1000000 # 1000 km
+
+zoi_values <- 100000# 100km 
+
+# SLOW
+risk_100km <- calc_zoi_cumulative(parr, type = "Gauss", radius = zoi_values)
 
 # 55943916 cells
-zoi_values <- c(1000 * 1000)
-
-risk_1km <- calc_zoi_cumulative(parr, type = "Gauss", radius = zoi_values)
-
-names(risk_1km)
+risk_100km
 
 myPal <- rev(RColorBrewer::brewer.pal('Spectral', n=4))
-
 selected_colours <- c("#5FA1F7", "#83A552","#9B1F1A")
 selected_colours <- get_pal("Pohutukawa") #[c(1,2,3,4)]
 myPal <- colorRampPalette(selected_colours)(100)
 myTheme <- rasterTheme(region = myPal)
 
-rasterVis::levelplot(risk_1km, par.settings = myTheme, main='Received risk (100 km)')
+rasterVis::levelplot(risk_100km, par.settings = myTheme, main='Received risk (100 km)')
 
-risk_df <- as.data.frame(risk_1km, xy = TRUE, na.rm = TRUE)
+# Create df
+risk_df <- as.data.frame(risk_100km, xy = TRUE, na.rm = TRUE)
 
 head(risk_df)
 nrow(risk_df)
 
-colnames(risk_df) <- c('x', 'y', 'zoi_cumulative_1000km' )
+colnames(risk_df) <- c('x', 'y', 'zoi_cumulative_100km' )
 
+setwd(here())
+setwd('results')
 write.csv(risk_df, 'risk_df_1000km.csv', row.names = FALSE)
 
-# map 
+# Pixel-level based map 
 
 zoi_map <- ggplot() +
   geom_tile(data = risk_df, aes(x = x, y = y, fill = zoi_cumulative_100km)) +
@@ -137,6 +143,6 @@ zoi_map <- ggplot() +
 
 zoi_map
 
-ggsave("fig_zoi_pixel_1000km.jpg", zoi_map, width = 4, height =4, dpi = 300)
+ggsave("fig_zoi_pixel_100km.jpg", zoi_map, width = 4, height =4, dpi = 300)
 
 #----------------------------------------------------------------------------------------------
