@@ -105,6 +105,12 @@ risk_100km <- calc_zoi_cumulative(parr, type = "Gauss", radius = zoi_values)
 # 55943916 cells
 risk_100km
 
+setwd('G:/')
+
+output_file <- "risk_100km.tif"
+
+writeRaster(risk_100km, output_file, overwrite = TRUE)
+
 myPal <- rev(RColorBrewer::brewer.pal('Spectral', n=4))
 selected_colours <- c("#5FA1F7", "#83A552","#9B1F1A")
 selected_colours <- get_pal("Pohutukawa") #[c(1,2,3,4)]
@@ -115,12 +121,11 @@ rasterVis::levelplot(risk_100km, par.settings = myTheme, main='Received risk (10
 
 # Create df
 risk_df <- as.data.frame(risk_100km, xy = TRUE, na.rm = TRUE)
-
 head(risk_df)
 nrow(risk_df)
-
 colnames(risk_df) <- c('x', 'y', 'zoi_cumulative_100km' )
 
+# Export
 setwd(here())
 setwd('results')
 write.csv(risk_df, 'risk_df_1000km.csv', row.names = FALSE)
@@ -139,10 +144,32 @@ zoi_map <- ggplot() +
 #annotation_north_arrow(location = "tr", which_north = "true", style = north_arrow_fancy_orienteering) +
 #annotation_scale(location = "bl", width_hint = 0.5, unit_category = "metric", 
 # style = "ticks", height = unit(0.3, "cm"), 
-# plot_unit = c("km"), pad_x = unit(0.2, "cm")) #+  coord_sf(crs = 4326)
+# plot_unit = c("km"), pad_x = unit(0.2, "cm")) #+  coord_sf(crs = 3857)
 
 zoi_map
 
-ggsave("fig_zoi_pixel_100km.jpg", zoi_map, width = 4, height =4, dpi = 300)
 
+zoi_map_nolabs <- ggplot() +
+  geom_tile(data = risk_df, aes(x = x, y = y, fill = zoi_cumulative_100km)) +
+  coord_fixed(1.3) + 
+  theme_minimal() +  
+  theme_void() +
+  labs(title = "") +
+  scale_fill_gradient(low= "#5FA1F7", high= "#9B1F1A", 
+  breaks = range(risk_df$zoi_cumulative_100km),
+  labels = c("Low", "High")) + 
+  labs(fill='')+
+  theme(plot.background = element_rect(fill = "azure2", color = NA)) #+
+#annotation_north_arrow(location = "tr", which_north = "true", style = north_arrow_fancy_orienteering) +
+#annotation_scale(location = "bl", width_hint = 0.5, unit_category = "metric", 
+# style = "ticks", height = unit(0.3, "cm"), 
+# plot_unit = c("km"), pad_x = unit(0.2, "cm")) #+  coord_sf(crs = 3857)
+
+zoi_map_nolabs
+
+setwd(here())
+setwd('results/Figures')
+
+ggsave("Fig_04C.jpg", zoi_map_nolabs, width = 4, height =4, dpi = 300)
+ggsave("Fig_04C.tif", zoi_map_nolabs, width = 4, height =4, dpi = 300)
 #----------------------------------------------------------------------------------------------
