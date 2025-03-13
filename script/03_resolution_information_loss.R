@@ -3,7 +3,8 @@
 
 require(here)
 
-#setwd('results')
+setwd(here())
+setwd('results')
 data <- read.table('resolution_effect_eride.txt', head=TRUE)
 
 data
@@ -366,13 +367,14 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
 
 plot_mean
 
-setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
 ggsave("model_selection_eride_mean.jpg", plot = plot_mean, width = 8, height = 8, dpi = 300) 
 
 
 library(ggpubr)
+setwd(here())
+setwd('results//Figures/')
 
 combined_plot <- ggarrange(plot, plot_mean, ncol = 2, nrow = 1)
 
-ggsave("Figure_01_AB.jpg", combined_plot, width = 11, height = 6, dpi = 300)
+ggsave("Fig_03_AB.jpg", combined_plot, width = 11, height = 6, dpi = 300)
 #--------------------------------

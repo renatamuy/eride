@@ -139,35 +139,4 @@ summary(area_stats$Area_ha)
 5.3 / 100
 347815.3 / 100
 
-# Not running in GRASS 8.2.0 (2022)
-# Not running in GRASS 8.4 (2025)
-# Get area in square units as raster
-
-rgrass::execGRASS("g.version")
-
-rgrass::execGRASS(cmd = "r.area",
-                  flags = c("overwrite"),
-                  input = "r_fragment_id",
-                  output = "r_fragment_area")
-
-# export
-
-rgrass::execGRASS(cmd = "r.out.gdal",
-                  flags = c("overwrite"),
-                  input = "r_fragment_area",
-                  output = "r_fragment_area_30m.tif",
-                  format = "GTiff")
-
-# Area in ha
-rgrass::execGRASS(cmd = "r.mapcalc",
-                  flags = c("overwrite"),
-                  expression = paste0("r_fragment_area_ha  = r_fragment_area * 0.09"))
-
-# Export
-rgrass::execGRASS(cmd = "r.out.gdal",
-                  flags = c("overwrite"),
-                  input = "r_fragment_area",
-                  output = "r_fragment_area_ha_30m.tif",
-                  format = "GTiff")
-
-#------------------------------------------
+#--------------------------------------------------------------------------------------
