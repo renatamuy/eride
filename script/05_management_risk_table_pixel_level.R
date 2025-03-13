@@ -170,6 +170,6 @@ zoi_map_nolabs
 setwd(here())
 setwd('results/Figures')
 
-ggsave("Fig_04C.jpg", zoi_map_nolabs, width = 4, height =4, dpi = 300)
-ggsave("Fig_04C.tif", zoi_map_nolabs, width = 4, height =4, dpi = 300)
+ggsave("Fig_04C.jpg", zoi_map_nolabs, width=18, height = 10, dpi = 300)
+ggsave("Fig_04C.tif", zoi_map_nolabs, width=18, height = 10, dpi = 300)
 #----------------------------------------------------------------------------------------------
