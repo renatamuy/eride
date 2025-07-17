@@ -195,9 +195,18 @@ data <- recebe %>%
 unique(data$statistic)
 
 data
+# Open done data
+
+require(here)
+require(xlsx)
+
+setwd(here())
+setwd('results')
+
+data <- read.xlsx('Table_z_data500m.xlsx', sheetIndex = 1)
 
 data <- data %>%
-  mutate(z = ifelse(grepl("z$", tag), "z  = 0.30", "z  = 0.20"))
+  mutate(z = ifelse(grepl("z$", tag), "z  = 0.28", "z  = 0.20"))
 
 str(data$Var1)
 data$Var1 <- gsub(" ", "", data$Var1)
@@ -206,6 +215,8 @@ data$Components <- as.factor(data$Var1)
 
 levels(data$Components)
 
+
+## 
 
 
 comparison_plot <- data %>% 
@@ -242,11 +253,13 @@ data500m
 
 26.25 /16.11
 
-require(xlsx)
 
+#Dont export.. done!
 #write.xlsx(data500m, file = 'Table_z_data500m.xlsx', row.names = FALSE)
-
 
 ggsave(comparison_plot, filename= 'Fig_S1.jpg', dpi=400, width=10, height = 9, units = 'cm')
 ggsave(comparison_plot, filename= 'Fig_S1.tif', dpi=400, width=10, height = 9, units = 'cm')
+
+
+
 #-------------------------------------------------------------------------------------------------------------
