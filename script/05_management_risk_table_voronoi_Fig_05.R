@@ -224,11 +224,11 @@ par_joy <- landcov_longl %>%
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53"), !is.na(PAR_category)) %>%  
   ggplot(aes(x = manag_value, y = Type_Specific, fill = Type_Specific)) + 
   facet_wrap(~ PAR_category, nrow = 1, scales = "fixed") + 
-  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE) +
+  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE, from = 0) +
   labs(x = "Land cover Proportion", y = "Management type", fill = "Management type") +
   scale_fill_manual(values = get_pal("Pohutukawa")[c(4, 3, 2)]) + 
   geom_vline(xintercept = 0.3, linetype = "dashed", color = "gray50", size = 1) + 
-  geom_vline(xintercept = 0.0, linetype = "dashed", color = "gray50", size = 1) + 
+  #geom_vline(xintercept = 0.0, linetype = "dashed", color = "gray50", size = 1) + 
   theme_minimal() +  
   theme(legend.position = "right") 
 
@@ -237,8 +237,8 @@ par_joy <- landcov_longl %>%
 par_joy
 
 #export Fig 05 main text
-ggsave("Fig_05.jpg", plot = par_joy, width = 10, height = 3, dpi = 300)
-ggsave("Fig_05.tif", plot = par_joy, width = 10, height = 3, dpi = 300)
+ggsave("Fig_05_R1.jpg", plot = par_joy, width = 10, height = 3, dpi = 300)
+ggsave("Fig_05_R1.tif", plot = par_joy, width = 10, height = 3, dpi = 300)
 
 # Checking
 unique(regions_updated_PAR$name_x)
