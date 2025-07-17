@@ -2,6 +2,10 @@
 # Renata Muylaert
 
 require(here)
+require(bbmle)
+require(segmented)
+library(ggrepel)
+library(ggpubr)
 
 setwd(here())
 setwd('results')
@@ -48,6 +52,7 @@ head(data)
 
 data <- data.frame(scale=data$Resolution, cost=data$cost, information=data$SD_loss)
 
+head(data)
 # abs diff (info loss)
 data$information <- abs(data$information)
 
@@ -133,7 +138,6 @@ predicted_data$glm_lwr <- glm_se$fit - 1.96 * glm_se$se.fit
 predicted_data$glm_upr <- glm_se$fit + 1.96 * glm_se$se.fit
 
 #piecewise
-
 piecewise_predictions <- predict(piecewise_model, newdata = predicted_data, interval = "confidence")
 
 # Add predictions and confidence intervals to predicted_data
@@ -185,6 +189,9 @@ predicted_data$gam_upr4 <- gam_predictions$fit + 1.96 * gam_predictions$se.fit
 
 library(ggplot2)
 
+# key resolutions for labs
+keyres <- c(100, 400, 500, 600, 1000, 2000, 5000)
+
 # Create the plot with larger font sizes
 plot <- ggplot(data, aes(x = cost, y = information)) +
   geom_point(color = "black", size = 4, alpha = 0.6) +  # Observed data
@@ -206,13 +213,12 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   geom_line(data = predicted_data, aes(x = cost, y = piecewise_pred), color = "black",  size = 1) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
-  labs(
-    title = "A",
-    x = "Cost",
-    y = "Information loss (eRIDE) - SD"
-  ) +
+  labs(    title = "A",
+    x = "Cost",    y = "Information loss (eRIDE) - SD"  ) +
   #scale_y_log10(limits = c(0.1, 30))+
-  geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  geom_label_repel(data = subset(data, scale %in% keyres),
+    aes(label = paste0(scale, ' m')),    color = "black",
+    size = 3.5, max.overlaps = Inf, nudge_x = 0.1 )  + 
   coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
@@ -226,8 +232,9 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
 
 plot
 
-setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
-ggsave("model_selection_eride_SD.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
+setwd(here())
+setwd('results')
+ggsave("Fig_03_eride_SD_R1.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
 
 #---------------------------------------------------------
 
@@ -347,15 +354,15 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
   geom_line(data = predicted_data, aes(x = cost, y = piecewise_pred), color = "black",  size = 1) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
-  labs(
-    title = "B",
-    x = "Cost",
-    y = "Information loss (eRIDE) - Mean"
-  ) +
+  labs( title = "B",  x = "Cost", y = "Information loss (eRIDE) - Mean") + 
   #scale_y_log10(limits = c(0.1, 30))+
-  geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
-  coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
-  theme_minimal(base_size = 14) +  # Increase base font size
+  geom_label_repel(
+    data = subset(data, scale %in% keyres),
+    aes(label = paste0(scale, ' m')),
+    color = "black",
+    size = 3.5,
+    max.overlaps = Inf, nudge_x = 0.1 )  + 
+  coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) + 
   theme(
     plot.title = element_text(size = 18, face = "bold"),
     axis.title = element_text(size = 16),
@@ -367,14 +374,13 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
 
 plot_mean
 
-ggsave("model_selection_eride_mean.jpg", plot = plot_mean, width = 8, height = 8, dpi = 300) 
+ggsave("Fig_03_eride_mean_R1.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
 
-
-library(ggpubr)
+#-- Export
 setwd(here())
 setwd('results//Figures/')
 
 combined_plot <- ggarrange(plot, plot_mean, ncol = 2, nrow = 1)
 
-ggsave("Fig_03_AB.jpg", combined_plot, width = 11, height = 6, dpi = 300)
+ggsave("Fig_03_AB_R1.jpg", combined_plot, width = 11, height = 6, dpi = 300)
 #--------------------------------

@@ -249,13 +249,4 @@ require(xlsx)
 
 ggsave(comparison_plot, filename= 'Fig_S1.jpg', dpi=400, width=10, height = 9, units = 'cm')
 ggsave(comparison_plot, filename= 'Fig_S1.tif', dpi=400, width=10, height = 9, units = 'cm')
-# Do it for all scales???
-# If yes, we can run a wilcoxon's test
-
-
-#--------------------------------
-
-
-
-
 #-------------------------------------------------------------------------------------------------------------

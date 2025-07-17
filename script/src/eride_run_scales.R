@@ -1,4 +1,4 @@
-eride_run_scales <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.28, radius = 10) {
+eride_run_scales <- function(rast, pop, nprocs = 7, memory = 1000, z = 0.2, radius = 10) {
   library(rgrass)
   
   start_time <- Sys.time()

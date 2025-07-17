@@ -11,7 +11,9 @@ require(raster)
 
 
 # package list
-pkg_list_cran <- c("devtools", 
+pkg_list_cran <- c("segmented",
+                   "bbmle",
+                   "devtools", 
                    "here",
                    "tidyverse",
                    "xlsx", 

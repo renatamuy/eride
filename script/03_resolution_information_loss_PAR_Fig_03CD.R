@@ -181,8 +181,10 @@ library(ggplot2)
 
 data
 
+keyres <- c(100, 400, 500, 600, 1000, 2000, 5000)
+
 # Create the plot with larger font sizes
-plot <- ggplot(data, aes(x = cost, y = information)) +
+plot_PAR <- ggplot(data, aes(x = cost, y = information)) +
   geom_point(color = "black", size = 4, alpha = 0.6) +  # Observed data
   # GLM model
   geom_line(data = predicted_data, aes(x = cost, y = glm_pred), color = "firebrick", linetype = "dotdash", size = 1) +
@@ -208,7 +210,13 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
     y = "Information loss (PAR) - SD"
   ) +
   #scale_y_log10(limits = c(0.1, 30))+
-  geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  #geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  geom_label_repel(
+    data = subset(data, scale %in% keyres),
+    aes(label = paste0(scale, ' m')),
+    color = "black",
+    size = 3.5,
+    max.overlaps = Inf, nudge_x = 0.1 )  + 
   coord_cartesian(xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
@@ -219,11 +227,11 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
     legend.title = element_text(size = 14),
     legend.text = element_text(size = 12))
 
-plot
+plot_PAR
 
-
-setwd('C://Users//rdelaram//Documents//GitHub//eride//results//')
-ggsave("model_selection_par_SD.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
+setwd(here())
+setwd('results')
+ggsave("model_selection_par_SD_R1.jpg", plot = plot, width = 8, height = 8, dpi = 300)  
 #---------------------------------------------------------
 
 # Mean loss -  models PAR ------------------------------------------------------------------------------------
@@ -326,7 +334,7 @@ data$logcost2 <- log(data$cost^0.5)
 plot(data$logcost2, data$information, pch=19, cex=2)
 
 
-plot_mean <- ggplot(data, aes(x = cost, y = information)) +
+plot_mean_PAR <- ggplot(data, aes(x = cost, y = information)) +
   geom_point(color = "black", size = 4, alpha = 0.6) +  # Observed data
   # GLM model
   geom_line(data = predicted_data, aes(x = cost, y = glm_pred), color = "firebrick", linetype = "dotdash", size = 1) +
@@ -352,7 +360,13 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
     y = "Information loss (PAR) - Mean"
   ) +
   #scale_y_log10(limits = c(0.1, 30))+
-  geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  #geom_label(aes(label = paste0(scale, ' m')  ), color = "black", hjust = -0.2, vjust = 0.5, size = 3.5) + # note rev
+  geom_label_repel(
+    data = subset(data, scale %in% keyres),
+    aes(label = paste0(scale, ' m')),
+    color = "black",
+    size = 3.5,
+    max.overlaps = Inf, nudge_x = 0.1 )  + 
   coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +
   #coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
@@ -365,7 +379,7 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
     legend.text = element_text(size = 12)
   ) 
 
-plot_mean
+plot_mean_PAR
 
 # Export figs 
 
@@ -373,8 +387,15 @@ library(ggpubr)
 
 setwd('Figures')
 
-combined_plot <- ggarrange(plot, plot_mean, ncol = 2, nrow = 1)
+combined_plot_PAR <- ggarrange(plot_PAR, plot_mean_PAR, ncol = 2, nrow = 1)
 
-ggsave("Figure_03_CD.jpg", combined_plot, width = 11, height = 6, dpi = 300)
+ggsave("Figure_03_CD_R1.jpg", combined_plot_PAR, width = 11, height = 6, dpi = 300)
+
+
+combined_plot_R1 <- ggarrange(plot, plot_mean, plot_PAR, plot_mean_PAR, ncol = 2, nrow = 2)
+
+combined_plot_R1
+
+ggsave("Figure_03_R1.jpg", combined_plot_R1, width = 11, height = 12, dpi = 400)
 
 #------------------
