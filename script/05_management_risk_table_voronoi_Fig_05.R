@@ -1,5 +1,6 @@
+# Supplemental figures
 # Management layer and Pop at risk biv maps
-# 
+# R. Muylaert
 #--------------------------------------------------------------
 
 require(terra)
@@ -18,14 +19,17 @@ library(exactextractr)
 library(biscale)
 library(cowplot)
 library(here)
+library(ggridges)
 
 # Get management raster
-lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_with-colorbar.tif'
+lesiv <- 'C://Users//rdel0062//Downloads/FML_v3-2_with-colorbar.tif'
 
 manrast <- rast(lesiv)
-  
+
 # Open voronoi
-vector_file <- "C://Users//rdelaram//Documents//GitHub//eride/results//regions_voronoi_forced_PAR.shp" 
+setwd(here())
+setwd('results')
+vector_file <- "regions_voronoi_forced_PAR.shp" 
 
 regions <- read_sf(vector_file)
 
@@ -48,14 +52,12 @@ landcov_fracs <- exact_extract(raster_layer_raster, regions, function(df) {
 landcov_fracs
 
 # Plots
-
 land_cover_lookup <- data.frame(
   value = c(11, 20, 31, 32, 40, 53),
   Type_Broad = c("No management", "Managed", "Managed", "Managed", "Managed", "Managed"),
   Type_Specific = c("No management", "Managed low-level", "Managed long time", "Managed short time", "Managed oil Palm", "Managed agroforestry")
 )
 
-# Assuming 'landcov_fracs' is your dataframe with the columns: name, value, and freq
 landcov_fracs <- landcov_fracs %>%
   left_join(land_cover_lookup, by = "value")
 
@@ -75,7 +77,6 @@ regions_updated <- regions %>%
   left_join(landcov_wide, by = "voronoi_id")
 
 # exploration
-
 ggplot(data = regions_updated) +
   geom_sf(aes(fill = manag_11), color = NA) +  
   scale_fill_viridis_c(option = "viridis", name = "Non-Managed Area") +
@@ -91,8 +92,7 @@ ggplot(data = regions_updated) +
 landcov_fracs <- landcov_fracs %>%
   mutate(name = factor(stringr::str_extract(voronoi_id, "^[^_]+")) )
 
-# Figure S8
-  
+# Figure Supplements
 landcov_fracs %>%
   filter(!is.na(value)) %>%
   ggplot(aes(x = name, y = freq, fill = Type_Specific)) +
@@ -107,14 +107,11 @@ landcov_fracs %>%
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = 'right')
 
-
 # Open PAR file
 setwd(here())
 setwd('results')
 st_write(regions_updated, "management_cover_voronoi.shp", append=FALSE)
-
 #-----------------
-
 regions_PAR <- read_sf('regions_voronoi_forced_PAR.shp')
 
 data.frame(regions_PAR[c('voronoi_id', 'PAR')])
@@ -122,7 +119,6 @@ data.frame(regions_PAR[c('voronoi_id', 'PAR')])
 # Join
 regions_updated_PAR <- regions_updated %>%
   left_join(data.frame(regions_PAR[c('voronoi_id', 'PAR')]))
-
 
 # after creating regions_updated_PAR
 table_management_districts <- landcov_fracs %>%
@@ -154,7 +150,6 @@ colnames(landcov_longl)
 landcov_longl$Type_Specific
 
 # Create the scatterplot
-
 fig_land_par_gam <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
@@ -175,7 +170,6 @@ fig_land_par_gam
 #ggsave("fig_land_par_voronoi_gam_col_log.png", fig_land_par_gam, width = 8, height =4, dpi = 300)
 #ggsave("fig_land_par_voronoi_gam_col_log.jpg", fig_land_par_gam, width = 8, height =4, dpi = 300)
 
-
 fig_land_par_glm <- landcov_longl %>% 
   filter(manag_type %in% c("manag_11", "manag_20", "manag_53")) %>% 
   ggplot(aes(x = manag_value, y = PAR, color = Type_Specific)) +
@@ -194,21 +188,17 @@ fig_land_par_glm
 # Save
 setwd(here())
 setwd('results/Figures')
-ggsave("Fig_S10B.png", fig_land_par_glm, width = 8, height =4, dpi = 300)
-ggsave("Fig_S10B.jpg", fig_land_par_glm, width = 8, height =4, dpi = 300)
-
+ggsave("Fig_S9B.png", fig_land_par_glm, width = 8, height =4, dpi = 300)
+ggsave("Fig_S9B.jpg", fig_land_par_glm, width = 8, height =4, dpi = 300)
 
 # joyplot -----------------------------------
-library(ggridges)
 summary(landcov_longl$PAR)
-
 
 mean_par <- mean(landcov_longl$PAR, na.rm = TRUE)
 
 # Create new column "PAR_above_below"
 landcov_longl <- landcov_longl %>%
   mutate(PAR_above_below = ifelse(PAR > mean_par, "high PAR", "low PAR"))
-
 
 sd_par <- sd(landcov_longl$PAR, na.rm = TRUE)
 
@@ -227,25 +217,28 @@ landcov_longl <- landcov_longl %>%
   mutate(PAR_category = factor(PAR_category, 
                                levels = c("very low PAR", "low PAR", "high PAR", "very high PAR")))
 
-
 #------
+summary(landcov_longl$manag_value)
+
 par_joy <- landcov_longl %>%
-  filter(manag_type %in% c("manag_11", "manag_20", "manag_53"), !is.na(PAR_category)) %>%  # Remove NA values
+  filter(manag_type %in% c("manag_11", "manag_20", "manag_53"), !is.na(PAR_category)) %>%  
   ggplot(aes(x = manag_value, y = Type_Specific, fill = Type_Specific)) + 
   facet_wrap(~ PAR_category, nrow = 1, scales = "fixed") + 
-  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE) +  # Ridge plot settings
-  labs(x = "% Land cover", y = "Management type", fill = "Management type") +  # Update axis labels
-  scale_fill_manual(values = get_pal("Pohutukawa")[c(4, 3, 2)]) +  # Apply the same palette
-  geom_vline(xintercept = 0.3, linetype = "dashed", color = "gray50", size = 1) +  # Add dashed line at x = 0.3
+  geom_density_ridges(scale = 2, rel_min_height = 0.01, size = 0.8, show.legend = FALSE) +
+  labs(x = "Land cover Proportion", y = "Management type", fill = "Management type") +
+  scale_fill_manual(values = get_pal("Pohutukawa")[c(4, 3, 2)]) + 
+  geom_vline(xintercept = 0.3, linetype = "dashed", color = "gray50", size = 1) + 
+  geom_vline(xintercept = 0.0, linetype = "dashed", color = "gray50", size = 1) + 
   theme_minimal() +  
-  theme(legend.position = "right")
+  theme(legend.position = "right") 
+
+# + coord_cartesian(xlim = c(-0.4, 1))
 
 par_joy
 
-#export Fig 05
+#export Fig 05 main text
 ggsave("Fig_05.jpg", plot = par_joy, width = 10, height = 3, dpi = 300)
 ggsave("Fig_05.tif", plot = par_joy, width = 10, height = 3, dpi = 300)
-
 
 # Checking
 unique(regions_updated_PAR$name_x)
@@ -255,7 +248,7 @@ data <- bi_class(regions_updated_PAR, x = PAR, y = manag_11, style = "quantile",
 
 data
 
-map <- ggplot() +
+map <- ggplot() + 
   geom_sf(data = data, mapping = aes(fill = bi_class), color = "white", size = 0.1, show.legend = FALSE) +
   bi_scale_fill(pal = "GrPink", dim = 3) +
   labs(
@@ -285,7 +278,6 @@ bivfig <- cowplot::ggdraw() +
 
 # B
 data <- bi_class(regions_updated_PAR, x = PAR, y = manag_53, style = "quantile", dim = 3)
-
 
 mapb <- ggplot() +
   geom_sf(data = data, mapping = aes(fill = bi_class), color = "white", size = 0.1, show.legend = FALSE) +
@@ -321,7 +313,6 @@ bivfigs_long <- cowplot::ggdraw() +
 
 bivfigs_long
 
-ggsave(filename = "Fig_S8.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
-ggsave(filename = "Fig_S8.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
-
+ggsave(filename = "Fig_S7.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
+ggsave(filename = "Fig_S7.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 #--------------------------------------
