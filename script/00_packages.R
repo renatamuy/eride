@@ -1,17 +1,6 @@
-#' ----
-# Packages used in Muylaert et al
-#' ----
-
-# extra 
-library(ggplot2)
-library(dplyr)
-library(hrbrthemes)
-require(RColorBrewer)
-require(raster)
-
-
 # package list
-pkg_list_cran <- c("segmented",
+pkg_list_cran <- c("memuse",
+                  "segmented",
                    "bbmle",
                    "devtools", 
                    "here",
@@ -28,6 +17,7 @@ pkg_list_cran <- c("segmented",
                    "spData",
                    "sf",
                    "raster",
+                   "rasterVis",
                    "terra",
                    "ggmap",
                    "ggspatial",
@@ -47,7 +37,10 @@ pkg_list_cran <- c("segmented",
                    "RColorBrewer",
                    "viridis",
                    "wesanderson",
-                   "hrbrthemes")
+                   "hrbrthemes",
+                   "tidyterra",
+                   "sfnetworks", 
+                  "exactextractr")
 
 # require else install all packages
 lapply(X = pkg_list_cran, 

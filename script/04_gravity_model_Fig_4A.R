@@ -1,4 +1,11 @@
-# java zonal - gravity model
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Java zonal - gravity model
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 gc()
 require(terra)

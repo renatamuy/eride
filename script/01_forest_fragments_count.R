@@ -1,5 +1,17 @@
-# Landscape characterization
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Landscape characterization
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
+
+# Muylaert et al (2025)
+# 
 # GRASS 8.4.1 (2025)
+# ------------------------------------------------------------------------------
+
 # Packages ---------------------------------------------------------------------------------------------------
 
 require(terra)

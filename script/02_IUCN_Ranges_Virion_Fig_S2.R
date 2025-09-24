@@ -1,3 +1,12 @@
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Plot viruses ~ mammal hosts
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
+
 # Plot viruses ~ mammal hosts
 # Virus layer source: Virion
 # Source: Mammal hosts layer IUCN 2021

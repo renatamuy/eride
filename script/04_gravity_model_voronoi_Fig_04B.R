@@ -1,4 +1,11 @@
-# java zonal - gravity model - voronoi-polygons
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: java - gravity model - Voronoi vectorise
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 gc()
 require(terra)
@@ -7,7 +14,6 @@ require(rnaturalearth)
 require(sf)
 require(ggplot2)
 library(dplyr)
-#devtools::install_github("G-Thomson/Manu")
 library(Manu)
 library(ggraph)
 library(tidygraph)

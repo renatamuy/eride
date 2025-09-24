@@ -1,5 +1,11 @@
-# Automated extracted values for PAR
-# Renata Muylaert
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Automated extracted values for PAR
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 library(MASS)
 library(bbmle)
@@ -8,6 +14,7 @@ if(!requireNamespace("mgcv", quietly = TRUE)) install.packages("mgcv")
 library(mgcv)
 library(segmented)
 library(here)
+
 # Data
 
 setwd(here())
@@ -63,7 +70,7 @@ data$information <- abs(data$information)
 #  estimated slope through log normal
 #lognorm_model_slope <- mle2(   minuslogl = function(mu, sigma, beta) {
 #    # Calculate the log-likelihood for the log-normal distribution
- #   -sum(dlnorm(data$information, meanlog = mu + beta * data$cost, sdlog = sigma, log = TRUE))
+#   -sum(dlnorm(data$information, meanlog = mu + beta * data$cost, sdlog = sigma, log = TRUE))
 #  },
 #  start = list(mu = 0.5, sigma = 0.5, beta = 0.3)  # Initial value for beta
 #)
@@ -396,6 +403,6 @@ combined_plot_R1 <- ggarrange(plot, plot_mean, plot_PAR, plot_mean_PAR, ncol = 2
 
 combined_plot_R1
 
-ggsave("Figure_03_R1.jpg", combined_plot_R1, width = 11, height = 12, dpi = 400)
+ggsave("Figure_03_proof.jpg", combined_plot_R1, width = 11, height = 12, dpi = 400)
 
 #------------------

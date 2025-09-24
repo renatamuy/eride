@@ -1,5 +1,11 @@
-# Automated extraction of values
-# Renata Muylaert
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Automated extraction of values
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 require(here)
 require(bbmle)
@@ -124,12 +130,12 @@ cost_seq <- seq(min(data$cost), max(data$cost), length.out = 100)
 
 # Generate predictions for each model
 predicted_data <- data.frame( cost = cost_seq,
-  glm_pred = predict(glm_model, newdata = data.frame(cost = cost_seq), type = "response") #,
-  #exp_pred = predict(exp_model, newdata = data.frame(cost = cost_seq), type = "response"),
-  #lognorm_pred = exp(coef(lognorm_model_slope)["mu"] + 
-  #                     coef(lognorm_model_slope)["beta"] * cost_seq),
-  #lognorm_0p5_pred = exp(coef(lognorm_model_0p5)["mu"] + 
-  #                               coef(lognorm_model_0p5)["beta"] * cost_seq)
+                              glm_pred = predict(glm_model, newdata = data.frame(cost = cost_seq), type = "response") #,
+                              #exp_pred = predict(exp_model, newdata = data.frame(cost = cost_seq), type = "response"),
+                              #lognorm_pred = exp(coef(lognorm_model_slope)["mu"] + 
+                              #                     coef(lognorm_model_slope)["beta"] * cost_seq),
+                              #lognorm_0p5_pred = exp(coef(lognorm_model_0p5)["mu"] + 
+                              #                               coef(lognorm_model_0p5)["beta"] * cost_seq)
 )
 
 # Calculate confidence intervals for GLM
@@ -214,11 +220,11 @@ plot <- ggplot(data, aes(x = cost, y = information)) +
   #geom_ribbon(data = predicted_data, aes(x = cost, ymin = piecewise_lwr, ymax = piecewise_upr), fill = "cyan", alpha = 0.2) +
   # Axis labels and theme
   labs(    title = "A",
-    x = "Cost",    y = "Information loss (eRIDE) - SD"  ) +
+           x = "Cost",    y = "Information loss (eRIDE) - SD"  ) +
   #scale_y_log10(limits = c(0.1, 30))+
   geom_label_repel(data = subset(data, scale %in% keyres),
-    aes(label = paste0(scale, ' m')),    color = "black",
-    size = 3.5, max.overlaps = Inf, nudge_x = 0.1 )  + 
+                   aes(label = paste0(scale, ' m')),    color = "black",
+                   size = 3.5, max.overlaps = Inf, nudge_x = 0.1 )  + 
   coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) +  # Adjust y-axis limits
   theme_minimal(base_size = 14) +  # Increase base font size
   theme(
@@ -363,6 +369,7 @@ plot_mean <- ggplot(data, aes(x = cost, y = information)) +
     size = 3.5,
     max.overlaps = Inf, nudge_x = 0.1 )  + 
   coord_cartesian(ylim = c(-0.5, 3), xlim = c(0, 2.8e+7)) + 
+  theme_minimal(base_size = 14) + 
   theme(
     plot.title = element_text(size = 18, face = "bold"),
     axis.title = element_text(size = 16),

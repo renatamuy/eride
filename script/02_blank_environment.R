@@ -1,4 +1,11 @@
-# Blank environment and region set
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script:  Blank environment and region set
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 require(terra)
 require(rgrass)
@@ -52,7 +59,4 @@ rgrass::execGRASS("g.region", flags = c("p"))
 
 rgrass::execGRASS("g.proj", flags = c("p"))
 
-#----------------
-
-
-                  
+#-------------------------------------------------------------------------------

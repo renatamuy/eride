@@ -1,4 +1,11 @@
-# Get shapefile of a subset districts
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Indonesia adm limits shapefile
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 require(sf)
 require(rnaturalearth)

@@ -1,8 +1,11 @@
-# ------------------------------------------------------------------------------------------------------------
-# R 4.4.1 Race for Your Life        
-# eRIDE - March 2025
-# Toy data: East of Nagreg (around -6.38 latitude and 106.56 longitude)
-#-------------------------------------------------------------------------------------------------------------
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script:  Toy data: East of Nagreg (around -6.38 latitude and 106.56 longitude)
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 # Packages ---------------------------------------------------------------------------------------------------
 require(terra)

@@ -1,4 +1,11 @@
-# Management layer and Pop at risk biv maps
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Management layer and Pop at risk biv maps
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 require(terra)
 require(rgrass)
@@ -6,7 +13,6 @@ require(rnaturalearth)
 require(sf)
 require(ggplot2)
 library(dplyr)
-#devtools::install_github("G-Thomson/Manu")
 library(Manu)
 library(ggraph)
 library(tidygraph)
@@ -17,6 +23,7 @@ library(exactextractr)
 library(biscale)
 library(cowplot)
 library(here)
+
 # Get management rast
 
 lesiv <- 'D:/OneDrive - Massey University/hostland/data/lesiv_zenodo/FML_v3-2_with-colorbar.tif'
@@ -110,7 +117,6 @@ custom_palette <- c(
 
 
 # Create the bar plot with the manual palette
-
 
 landcov_fracs %>%
   filter(!is.na(value)) %>%
@@ -282,9 +288,9 @@ legendb <- bi_legend(pal = "GrPink",
                     size = 8)
 
 bivfigs_long <- cowplot::ggdraw() +
-  draw_plot(legend, 0, 0.55, 0.2, 0.45) +    # Legend on the left, occupying 20% width and 45% height
-  draw_plot(map, 0.2, 0.55, 0.8, 0.45) +     # Map on the right, taking 80% width
-  draw_plot(legendb, 0, 0.1, 0.2, 0.45) +    # Legendb on the left, same size as above
+  draw_plot(legend, 0, 0.55, 0.2, 0.45) +    # Legend on the left, 20% width and 45% height
+  draw_plot(map, 0.2, 0.55, 0.8, 0.45) +     # Map on the right, 80% width
+  draw_plot(legendb, 0, 0.1, 0.2, 0.45) +    # Legendbo n the left, same size as above
   draw_plot(mapb, 0.2, 0.1, 0.8, 0.45)       # Mapb on the right, same size as above
 
 # export 
@@ -293,4 +299,4 @@ bivfigs_long
 
 ggsave(filename = "Fig_S6.jpg", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
 ggsave(filename = "Fig_S6.tif", plot = bivfigs_long, width = 8, height = 8, dpi = 300)
-#--------------------------------------
+#-------------------------------------------------------------------------------

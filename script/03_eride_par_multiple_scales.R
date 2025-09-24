@@ -1,6 +1,11 @@
-#--------------------------------------------------
-# R 4.4.1 Race for Your Life        
-# eRIDE scales - March 2025
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: eRIDE scales
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 # Packages ---------------------------------------------------------------------------------------------------
 

@@ -1,7 +1,11 @@
-#------------------------------0
-# Resolition downscale effects - from 100 m to 5000 km
-# R. Muylaert 2024
-#-------------------------------
+################################################################################
+# Publication: Upscaling effects on infectious disease emergence risk emphasize 
+# the need for local planning in primary prevention within biodiversity hotspots
+# Script: Resolution upscale effects - from 100 m to 5000 km
+# Author: R. L. Muylaert
+# Date: 2025
+# R version 4.5.1
+################################################################################
 
 library(terra)  
 library(ggplot2) 
