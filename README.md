@@ -28,11 +28,11 @@ Run in R version 4.5.1 (2025-06-13) -- "Great Square Root"
 
 ## Instructions
 
-1.  Update R and RStudio to their latest versions;
+1.  Update R and RStudio (or not);
 
 2.  Open de folder `script`;
 
-3.  R script follows a numerical sequence starting in 00.
+3.  R script follows a numerical sequence starting in `00`.
 
 ## Feedback
 
