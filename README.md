@@ -2,9 +2,11 @@
 
 Workflow for *Muylaert et al. (2025) Upscaling effects on infectious disease emergence risk emphasize the need for local planning in primary prevention within biodiversity hotspots.*
 
- [preprint](https://www.researchsquare.com/article/rs-6340440/v1)
+ [Preprint](https://www.researchsquare.com/article/rs-6340440/v1)
 
- [article](10.1038/s41598-025-21514-4)
+ [Article](10.1038/s41598-025-21514-4)
+ 
+ [Zenodo]()
  
 Run in R version 4.5.1 (2025-06-13) -- "Great Square Root"
 

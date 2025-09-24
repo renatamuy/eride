@@ -403,6 +403,6 @@ combined_plot_R1 <- ggarrange(plot, plot_mean, plot_PAR, plot_mean_PAR, ncol = 2
 
 combined_plot_R1
 
-ggsave("Figure_03_proof.jpg", combined_plot_R1, width = 11, height = 12, dpi = 400)
+ggsave("Fig_03.jpg", combined_plot_R1, width = 11, height = 12, dpi = 400)
 
 #------------------
