@@ -4,9 +4,9 @@ Workflow for *Muylaert et al. (2025) Upscaling effects on infectious disease eme
 
  [Preprint](https://www.researchsquare.com/article/rs-6340440/v1)
 
- [Article](10.1038/s41598-025-21514-4)
+ [Article](https://www.nature.com/articles/s41598-025-21514-4)
  
- [Zenodo]()
+ [Zenodo](https://doi.org/10.5281/zenodo.17189331)
  
 Run in R version 4.5.1 (2025-06-13) -- "Great Square Root"
 
